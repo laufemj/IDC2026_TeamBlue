@@ -1,2 +1,2 @@
-# IDC2026_Team
-Repo for Team
+# IDC2026_TeamBlue
+Repo for TeamBlue
