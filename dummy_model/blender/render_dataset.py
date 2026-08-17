@@ -68,31 +68,136 @@ def jitter_lights(rng, sc):
 
 
 _CLUTTER = []
+_PHOTOS = None
+TEXTYPES = ["ShaderNodeTexNoise", "ShaderNodeTexVoronoi",
+            "ShaderNodeTexMagic", "ShaderNodeTexChecker",
+            "ShaderNodeTexWave"]
+
+
+def _load_photos(rng):
+    """Venue frames as texture sources (top strips only -- no dummies)."""
+    global _PHOTOS
+    if _PHOTOS is None:
+        real = os.path.join(os.path.dirname(MODEL),
+                            "image_20260812_173204_0001")
+        files = sorted(f for f in os.listdir(real) if f.endswith(".jpg"))
+        rng.shuffle(files)
+        _PHOTOS = [bpy.data.images.load(os.path.join(real, f))
+                   for f in files[:30]]
+    return _PHOTOS
+
+
+def rand_material(rng, idx):
+    """Procedural domain-randomization material, or a real-photo strip.
+
+    The venue clutter that draws false positives is TEXTURE, not shape --
+    cardboard flaps, posters, radiator fins.  Solid-colour boxes never taught
+    the model to reject texture, so the walls behind the goals now wear
+    either wild procedural patterns or crops from the real frames' upper
+    strips (a region that never contains a dummy).
+    """
+    m = bpy.data.materials.new(f"rm_{idx}")
+    m.use_nodes = True
+    nt = m.node_tree
+    bsdf = nt.nodes["Principled BSDF"]
+    if rng.random() < 0.35:
+        # real photo strip
+        tc = nt.nodes.new("ShaderNodeTexCoord")
+        sep = nt.nodes.new("ShaderNodeSeparateXYZ")
+        comb = nt.nodes.new("ShaderNodeCombineXYZ")
+        mapping = nt.nodes.new("ShaderNodeMapping")
+        img = nt.nodes.new("ShaderNodeTexImage")
+        img.image = rng.choice(_load_photos(rng))
+        nt.links.new(tc.outputs["Generated"], sep.inputs[0])
+        nt.links.new(sep.outputs["X"], comb.inputs["X"])
+        nt.links.new(sep.outputs["Z"], comb.inputs["Y"])
+        nt.links.new(comb.outputs[0], mapping.inputs["Vector"])
+        # random crop from the top strip: v in [0.6, 1.0]
+        mapping.inputs["Location"].default_value = (
+            rng.uniform(0.0, 0.6), rng.uniform(0.62, 0.8), 0.0)
+        mapping.inputs["Scale"].default_value = (
+            rng.uniform(0.25, 0.45), rng.uniform(0.12, 0.25), 1.0)
+        nt.links.new(mapping.outputs[0], img.inputs["Vector"])
+        nt.links.new(img.outputs["Color"], bsdf.inputs["Base Color"])
+        bsdf.inputs["Roughness"].default_value = rng.uniform(0.5, 0.9)
+        return m
+    tex = nt.nodes.new(rng.choice(TEXTYPES))
+    if "Scale" in tex.inputs:
+        try:
+            tex.inputs["Scale"].default_value = rng.uniform(1.5, 40.0)
+        except TypeError:
+            pass
+    ramp = nt.nodes.new("ShaderNodeValToRGB")
+    ramp.color_ramp.elements[0].color = (
+        rng.random(), rng.random(), rng.random(), 1)
+    ramp.color_ramp.elements[1].color = (
+        rng.random(), rng.random(), rng.random(), 1)
+    nt.links.new(tex.outputs[0], ramp.inputs["Fac"])
+    nt.links.new(ramp.outputs["Color"], bsdf.inputs["Base Color"])
+    bsdf.inputs["Roughness"].default_value = rng.uniform(0.2, 0.95)
+    if rng.random() < 0.25:
+        bsdf.inputs["Metallic"].default_value = rng.uniform(0.3, 0.9)
+    return m
+
+
+def _prim(rng, kind, size, loc):
+    if kind == "cyl":
+        bpy.ops.mesh.primitive_cylinder_add(radius=size[0] / 2,
+                                            depth=size[2], location=loc)
+    elif kind == "sph":
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=size[0] / 2,
+                                             location=loc)
+    else:
+        return B.box(f"cl_{rng.random()}", size, loc)
+    return bpy.context.object
 
 
 def build_clutter(rng):
-    """Random junk behind the goal row and on the carpet."""
+    """Randomized background: near backdrop wall, posters, junk shapes."""
     global _CLUTTER
     for o in _CLUTTER:
         bpy.data.objects.remove(o, do_unlink=True)
     _CLUTTER = []
-    palettes = [(0.35, 0.25, 0.15), (0.55, 0.45, 0.32),   # cardboard
-                (0.25, 0.25, 0.28), (0.55, 0.55, 0.58),   # steel/plastic
-                (0.30, 0.05, 0.05), (0.05, 0.15, 0.35),   # chairs
-                (0.65, 0.6, 0.2), (0.2, 0.4, 0.25)]       # bags
-    n = rng.randint(6, 14)
-    for i in range(n):
-        col = palettes[rng.randrange(len(palettes))]
-        col = tuple(min(1.0, c * rng.uniform(0.6, 1.5)) for c in col)
-        mat = B.new_mat(f"cl_{i}", (*col, 1.0), rough=rng.uniform(0.5, 0.95))
+    # drop last frame's one-shot materials so memory stays flat over a shard
+    for m in [m for m in bpy.data.materials if m.name.startswith("rm_")
+              and m.users == 0]:
+        bpy.data.materials.remove(m)
+
+    mi = 0
+
+    def mat():
+        nonlocal mi
+        mi += 1
+        return rand_material(rng, f"{rng.getrandbits(32)}_{mi}")
+
+    # near backdrop wall (the venue wall is 1.5-3 m behind the goals, not
+    # the 4.5 m of the room shell) -- present most of the time
+    if rng.random() < 0.75:
+        wy = rng.uniform(-2.8, -1.6)
+        w = B.box("cl_backdrop", (11, 0.05, rng.uniform(1.8, 2.6)),
+                  (0, wy, -0.212 + 1.2), mat())
+        _CLUTTER.append(w)
+        # posters / doors / windows on it
+        for i in range(rng.randint(2, 8)):
+            pw, ph = rng.uniform(0.3, 1.4), rng.uniform(0.3, 1.6)
+            p = B.box(f"cl_poster{i}", (pw, 0.03, ph),
+                      (rng.uniform(-4, 4), wy + 0.05,
+                       rng.uniform(0.2, 1.6)), mat())
+            _CLUTTER.append(p)
+
+    # junk on the carpet between field edge and backdrop
+    for i in range(rng.randint(5, 12)):
+        kind = rng.choice(["box", "box", "box", "cyl", "sph"])
         big = rng.random() < 0.4
         size = ((rng.uniform(0.5, 1.6), rng.uniform(0.3, 0.8),
                  rng.uniform(0.4, 0.9)) if big else
                 (rng.uniform(0.1, 0.45),) * 3)
-        x = rng.uniform(-2.2, 2.2)
-        y = rng.uniform(-1.7, -0.35)
-        o = B.box(f"cl_{i}", size, (x, y, -0.212 + size[2] / 2), mat)
+        loc = (rng.uniform(-2.2, 2.2), rng.uniform(-1.5, -0.35),
+               -0.212 + size[2] / 2)
+        o = _prim(rng, kind, size, loc)
         o.rotation_euler = (0, 0, rng.uniform(0, math.pi))
+        o.data.materials.clear()
+        o.data.materials.append(mat())
         _CLUTTER.append(o)
 
 

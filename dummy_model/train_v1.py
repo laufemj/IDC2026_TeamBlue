@@ -24,7 +24,7 @@ settings.update({"runs_dir": "/home/mj/Desktop/IDC2026/dummy_model/runs"})
 def main():
     model = YOLO("yolo11n.pt")
     model.train(
-        data="dataset_v2/data.yaml",
+        data="dataset_all/data.yaml",
         epochs=80,
         imgsz=640,
         batch=64,
