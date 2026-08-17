@@ -1,0 +1,38 @@
+{
+  "_comment": "Tunables for the intake ball-colour classifier.  ROI is in pixels of the full capture frame; re-measure after the camera is mounted.  Hue thresholds are deliberately wide: venue lighting measured +20 deg of hue drift on the real orange balls.  Defaults assume a DARK pocket: no internal LED, camera mounted very close (it shades its own subject), matte black interior -- hence high exposure/gain and low value floors.  If silver balls start reading as 'none' at the venue, the pocket is darker than even this; that is the cue to revisit the LED.",
+  "roi": [
+    560,
+    260,
+    720,
+    420
+  ],
+  "capture": {
+    "size": [
+      1280,
+      720
+    ],
+    "fps": 30,
+    "awb_enable": false,
+    "colour_gains": [
+      1.6,
+      1.9
+    ],
+    "exposure_us": 16000,
+    "analogue_gain": 4.0,
+    "af_mode_manual": true,
+    "lens_position": 10.0
+  },
+  "presence_diff": 0.13,
+  "presence_min_frac": 0.18,
+  "orange_hue_max": 60.0,
+  "orange_hue_wrap": 10.0,
+  "orange_sat_min": 0.35,
+  "orange_val_min": 0.08,
+  "orange_min_frac": 0.3,
+  "silver_sat_max": 0.22,
+  "silver_val_min": 0.15,
+  "silver_min_frac": 0.35,
+  "margin": 1.5,
+  "debounce_window": 5,
+  "debounce_stable": 3
+}

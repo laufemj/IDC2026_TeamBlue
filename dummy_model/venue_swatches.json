@@ -1,0 +1,57 @@
+{
+ "field_bright": [
+  177,
+  209,
+  101
+ ],
+ "field_dark": [
+  161,
+  195,
+  71
+ ],
+ "tape_black": [
+  65,
+  84,
+  78
+ ],
+ "goal_top_white": [
+  186,
+  213,
+  210
+ ],
+ "goal_rawply_in": [
+  109,
+  115,
+  75
+ ],
+ "goal_rawply_out": [
+  155,
+  186,
+  177
+ ],
+ "robot_silver": [
+  116,
+  149,
+  135
+ ],
+ "human_cloth": [
+  88,
+  118,
+  113
+ ],
+ "human_head_wood": [
+  151,
+  169,
+  110
+ ],
+ "human_hand_wood": [
+  164,
+  180,
+  150
+ ],
+ "room_carpet": [
+  162,
+  192,
+  180
+ ]
+}

@@ -1,0 +1,20 @@
+# heavy artifacts -- regenerable or reference-only, kept local
+*.zip
+image_20260812_173204_0001/
+KakaoTalk_*.jpg
+IDC2026_mujoco/
+IDC2026_CyberGame_0814/
+*.stl
+*.STL
+Design_Idea.PNG
+dummy_model/dataset*/
+dummy_model/runs/
+dummy_model/meshes/
+dummy_model/review/
+dummy_model/poses*.jsonl
+dummy_model/*.png
+dummy_model/dummy_scene.xml
+__pycache__/
+*.pyc
+*.pt
+dummy_model/MUJOCO_LOG.TXT
