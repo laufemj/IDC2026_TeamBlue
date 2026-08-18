@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dummy Detector Field Report</title>
+</head>
+<body>
+<style>
+  :root {
+    --bg: #fbfcf7;
+    --surface: #f2f5e9;
+    --ink: #22271c;
+    --ink-soft: #5a614f;
+    --line: #dde3cf;
+    --accent: #667a12;
+    --human: #1f8a4c;
+    --human-bg: #e3f2e9;
+    --robot: #c9660a;
+    --robot-bg: #faeadb;
+    --bad: #b3382f;
+    --bad-bg: #f9e7e4;
+    --good-bg: #e6efd2;
+    --mono: "SF Mono", "Cascadia Code", Consolas, "DejaVu Sans Mono", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #181b13;
+      --surface: #21251a;
+      --ink: #e8ebdd;
+      --ink-soft: #a3a996;
+      --line: #34392a;
+      --accent: #b4cc4e;
+      --human: #4fc580;
+      --human-bg: #1c3527;
+      --robot: #eb9440;
+      --robot-bg: #3c2a15;
+      --bad: #e5716a;
+      --bad-bg: #3d1f1c;
+      --good-bg: #2a331b;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #181b13;
+    --surface: #21251a;
+    --ink: #e8ebdd;
+    --ink-soft: #a3a996;
+    --line: #34392a;
+    --accent: #b4cc4e;
+    --human: #4fc580;
+    --human-bg: #1c3527;
+    --robot: #eb9440;
+    --robot-bg: #3c2a15;
+    --bad: #e5716a;
+    --bad-bg: #3d1f1c;
+    --good-bg: #2a331b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.6 "Avenir Next", "Segoe UI", "Helvetica Neue", system-ui, sans-serif;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 3rem 1.25rem 5rem; }
+  header { border-bottom: 3px solid var(--accent); padding-bottom: 1.5rem; margin-bottom: 2.5rem; }
+  .eyebrow {
+    font-family: var(--mono); font-size: .72rem; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 .5rem;
+  }
+  h1 { font-size: 2.1rem; line-height: 1.15; margin: 0 0 .6rem; text-wrap: balance; font-weight: 700; }
+  .meta { color: var(--ink-soft); font-size: .9rem; margin: 0; }
+  h2 { font-size: 1.3rem; margin: 3rem 0 .8rem; text-wrap: balance; }
+  h2 .num { color: var(--accent); font-family: var(--mono); font-size: 1rem; margin-right: .5rem; }
+  p { margin: 0 0 1rem; max-width: 68ch; }
+  .verdict {
+    background: var(--surface); border-left: 4px solid var(--accent);
+    padding: 1.1rem 1.3rem; border-radius: 0 6px 6px 0; margin: 0 0 1rem;
+  }
+  .verdict p { margin: 0; }
+  .verdict strong { color: var(--accent); }
+  .cards { display: flex; gap: .8rem; flex-wrap: wrap; margin: 1.2rem 0 0; }
+  .card {
+    flex: 1 1 150px; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 8px; padding: .9rem 1rem;
+  }
+  .card .big { font-family: var(--mono); font-size: 1.7rem; font-weight: 600; display: block; }
+  .card .lbl { font-size: .78rem; color: var(--ink-soft); line-height: 1.35; display: block; margin-top: .2rem; }
+  .tag {
+    display: inline-block; font-family: var(--mono); font-size: .78rem; font-weight: 600;
+    padding: .05rem .5rem; border-radius: 4px; white-space: nowrap;
+  }
+  .tag.h { background: var(--human-bg); color: var(--human); }
+  .tag.r { background: var(--robot-bg); color: var(--robot); }
+  .tag.bad { background: var(--bad-bg); color: var(--bad); }
+  .tablewrap { overflow-x: auto; margin: 1rem 0 1.4rem; }
+  table {
+    border-collapse: collapse; width: 100%; font-size: .9rem;
+    font-variant-numeric: tabular-nums;
+  }
+  th, td { text-align: left; padding: .45rem .7rem; border-bottom: 1px solid var(--line); }
+  th {
+    font-family: var(--mono); font-size: .72rem; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--ink-soft); font-weight: 600;
+  }
+  td.n, th.n { text-align: right; }
+  tr.hilite td { background: var(--good-bg); }
+  .bar { display: flex; align-items: center; gap: .6rem; }
+  .bar .track {
+    flex: 1; height: 8px; background: var(--line); border-radius: 4px; overflow: hidden;
+    min-width: 80px;
+  }
+  .bar .fill { height: 100%; border-radius: 4px; }
+  .bar .val { font-family: var(--mono); font-size: .85rem; width: 3.2em; text-align: right; }
+  .callout {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+    padding: 1rem 1.2rem; margin: 1.2rem 0; font-size: .93rem;
+  }
+  .callout .ct { font-family: var(--mono); font-size: .72rem; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--ink-soft); display: block; margin-bottom: .4rem; }
+  code {
+    font-family: var(--mono); font-size: .85em; background: var(--surface);
+    border: 1px solid var(--line); padding: .05em .35em; border-radius: 4px;
+  }
+  ol.rec { padding-left: 1.3rem; margin: 0; }
+  ol.rec li { margin-bottom: .7rem; max-width: 66ch; }
+  .dual { display: flex; gap: 1rem; flex-wrap: wrap; align-items: stretch; margin: 1.2rem 0; }
+  .dual figure { flex: 1 1 240px; margin: 0; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 8px; padding: 1rem; }
+  .dual figcaption { font-size: .8rem; color: var(--ink-soft); margin-top: .6rem; line-height: 1.4; }
+  svg text { font-family: var(--mono); font-size: 11px; fill: var(--ink-soft); }
+  footer { margin-top: 4rem; padding-top: 1rem; border-top: 1px solid var(--line);
+    font-size: .82rem; color: var(--ink-soft); }
+</style>
+
+<main>
+<header>
+  <p class="eyebrow">IDC2026 · Team Blue · Vision</p>
+  <h1>Can the detector tell which side is Human?</h1>
+  <p class="meta">YOLO11n trained on synthetic renders only, evaluated on 127 real venue photos (Aug 12 shoot) · model <code>v25f2</code> · 2026-08-18</p>
+</header>
+
+<div class="verdict">
+  <p><strong>Verdict: yes — at close range.</strong> At the distance where the robot actually makes its sorting decision (bounding box ≥ ~25% of image height), left/right Human-vs-Robot classification was <strong>100% correct</strong> in this photo set. Errors exist, but they are all far-range, all in one direction (Human misread as Robot), and two of the three failure causes are fixable in post-processing without retraining.</p>
+</div>
+
+<div class="cards">
+  <div class="card"><span class="big">85%</span><span class="lbl">frames with a usable, GT-consistent left/right reading (seated bursts, after dedupe)</span></div>
+  <div class="card"><span class="big">34/34</span><span class="lbl">silver Robot detections classified correctly — at every distance</span></div>
+  <div class="card"><span class="big">100%</span><span class="lbl">class accuracy for both dummies once the box is ≥260 px tall (close range)</span></div>
+</div>
+
+<h2><span class="num">01</span>What was tested</h2>
+<p>The competition places two visually near-identical wooden mannequins on the goals: the <span class="tag h">HUMAN</span> dummy wears grey clothes with bare wood showing, the <span class="tag r">ROBOT</span> dummy is painted silver. The robot only needs one bit of information per goal pair: <em>which side is Human, which side is Robot</em>. Exact boxes don't matter.</p>
+<p>Ground truth for the photo bursts (named by capture time, ordered left → right):</p>
+<div class="tablewrap"><table>
+  <tr><th>Burst</th><th>Layout (L → R)</th><th>Pose</th><th>Scored?</th></tr>
+  <tr><td>172414 / 172514 / 172618</td><td><span class="tag h">H</span> <span class="tag r">R</span></td><td>seated (legal)</td><td>yes — main result</td></tr>
+  <tr><td>172810 / 172904</td><td>—</td><td>pelvis detached</td><td>excluded per team decision</td></tr>
+  <tr><td>173126 / 173204</td><td><span class="tag h">H</span> <span class="tag r">R</span> <span class="tag h">H</span> <span class="tag r">R</span></td><td>standing (rule-illegal)</td><td>reference only</td></tr>
+</table></div>
+<p>Scoring: take detections (conf ≥ 0.25, plausible size), sort left to right, compare the class sequence to ground truth. Photos were handheld, so many frames legitimately show only one dummy — those count as "partial" and are fine as long as what <em>was</em> seen doesn't contradict the layout.</p>
+
+<h2><span class="num">02</span>Results per burst</h2>
+<div class="tablewrap"><table>
+  <tr><th>Burst</th><th>GT</th><th class="n">Frames</th><th class="n">Full match</th><th class="n">Partial, consistent</th><th class="n">Wrong</th><th class="n">Nothing found</th></tr>
+  <tr class="hilite"><td>172414 (farthest)</td><td>H R</td><td class="n">34</td><td class="n">4</td><td class="n">24</td><td class="n">2</td><td class="n">4</td></tr>
+  <tr class="hilite"><td>172514</td><td>H R</td><td class="n">26</td><td class="n">10</td><td class="n">12</td><td class="n">4</td><td class="n">0</td></tr>
+  <tr class="hilite"><td>172618 (nearest)</td><td>H R</td><td class="n">21</td><td class="n">15</td><td class="n">4</td><td class="n">1</td><td class="n">1</td></tr>
+  <tr><td>173126 (standing)</td><td>H R H R</td><td class="n">9</td><td class="n">0</td><td class="n">4</td><td class="n">5</td><td class="n">0</td></tr>
+  <tr><td>173204 (standing)</td><td>H R H R</td><td class="n">7</td><td class="n">0</td><td class="n">1</td><td class="n">5</td><td class="n">1</td></tr>
+</table></div>
+<p>Highlighted rows are the legal seated poses — the condition the robot will actually face: <strong>69 of 81 frames (85%) usable.</strong> The standing bursts collapse to "everything is Robot" — expected, because standing poses are illegal under the rules and were deliberately excluded from training. More on that in §05.</p>
+
+<h2><span class="num">03</span>Failure cause 1 — duplicate boxes, not real errors</h2>
+<p>Half of the "wrong" frames weren't wrong at all. YOLO's default duplicate suppression (NMS) runs <em>per class</em>, so one dummy can receive both a Human box and a Robot box at the same spot — which our left-to-right reading then counts as two dummies. <strong>27 such phantom boxes</strong> appeared across the set.</p>
+<div class="dual">
+  <figure>
+    <svg viewBox="0 0 220 120" width="100%" role="img" aria-label="One dummy with two overlapping boxes, one green one orange">
+      <rect x="80" y="30" width="52" height="76" fill="none" stroke="var(--human)" stroke-width="2.5"/>
+      <rect x="88" y="36" width="52" height="76" fill="none" stroke="var(--robot)" stroke-width="2.5" stroke-dasharray="5 3"/>
+      <circle cx="108" cy="52" r="9" fill="var(--ink-soft)"/>
+      <rect x="99" y="63" width="18" height="30" rx="5" fill="var(--ink-soft)"/>
+      <text x="12" y="20">before: H + R on the SAME dummy</text>
+    </svg>
+    <figcaption>Per-class NMS lets a Human box and a Robot box coexist on one dummy. Sorted left-to-right this reads as a bogus "R H" or "H H" pair.</figcaption>
+  </figure>
+  <figure>
+    <svg viewBox="0 0 220 120" width="100%" role="img" aria-label="One dummy with a single box after dedupe">
+      <rect x="84" y="32" width="52" height="76" fill="none" stroke="var(--human)" stroke-width="2.5"/>
+      <circle cx="110" cy="54" r="9" fill="var(--ink-soft)"/>
+      <rect x="101" y="65" width="18" height="30" rx="5" fill="var(--ink-soft)"/>
+      <text x="12" y="20">after: keep highest confidence</text>
+    </svg>
+    <figcaption>Cross-class dedupe (drop any box overlapping a stronger one, IoU &gt; 0.4) removes all 27 phantoms. One line at inference time: <code>agnostic_nms=True</code>.</figcaption>
+  </figure>
+</div>
+<p>Applying the dedupe lifted seated-burst wrong frames from 13 down to 7. This fix is free — no retraining.</p>
+
+<h2><span class="num">04</span>Failure cause 2 — the real one: far-range Human→Robot flips</h2>
+<p>The remaining genuine errors have a strict structure. Split per-detection class accuracy by box height (a proxy for distance):</p>
+<div class="tablewrap"><table>
+  <tr><th>Box height</th><th>≈ Range</th><th>GT = Human</th><th>GT = Robot</th></tr>
+  <tr><td>40–120 px</td><td>far</td>
+    <td><div class="bar"><div class="track"><div class="fill" style="width:75%;background:var(--bad)"></div></div><span class="val">75%</span></div></td>
+    <td><div class="bar"><div class="track"><div class="fill" style="width:100%;background:var(--robot)"></div></div><span class="val">100%</span></div></td></tr>
+  <tr><td>120–180 px</td><td></td>
+    <td><div class="bar"><div class="track"><div class="fill" style="width:80%;background:var(--bad)"></div></div><span class="val">80%</span></div></td>
+    <td><div class="bar"><div class="track"><div class="fill" style="width:100%;background:var(--robot)"></div></div><span class="val">100%</span></div></td></tr>
+  <tr><td>180–260 px</td><td></td>
+    <td><div class="bar"><div class="track"><div class="fill" style="width:92%;background:var(--human)"></div></div><span class="val">92%</span></div></td>
+    <td><div class="bar"><div class="track"><div class="fill" style="width:100%;background:var(--robot)"></div></div><span class="val">100%</span></div></td></tr>
+  <tr class="hilite"><td>260+ px</td><td>decision range</td>
+    <td><div class="bar"><div class="track"><div class="fill" style="width:100%;background:var(--human)"></div></div><span class="val">100%</span></div></td>
+    <td><div class="bar"><div class="track"><div class="fill" style="width:100%;background:var(--robot)"></div></div><span class="val">100%</span></div></td></tr>
+</table></div>
+<p>Two things jump out:</p>
+<p><strong>The error is one-directional.</strong> The silver Robot dummy was never once called Human. Every mistake is the grey-clothed Human dummy being called Robot, and only when small in frame. This matches our material measurements: under the venue's lime-green bounce light, grey cloth and silver paint are nearly the same color — the only reliable cue is the warm bare-wood head and hands, and at 120 px tall the head is ~15 px, too small to carry the decision. (The synthetic Human also has no garment mesh yet, so silhouette can't help either.)</p>
+<p><strong>It vanishes at decision range.</strong> Our arrival logic fires when the box reaches ~28% of image height — comfortably inside the 260+ px bucket where accuracy was 100/100.</p>
+<div class="callout"><span class="ct">Useful asymmetry for decision logic</span>
+When this model says <span class="tag h">HUMAN</span>, it has never been wrong in this set (100% precision). When it says <span class="tag r">ROBOT</span> at long range, there's a real chance it's actually the Human dummy. Any voting or symmetry logic should weight Human calls heavily and distrust far-range Robot calls.</div>
+
+<h2><span class="num">05</span>Failure cause 3 — misses, and the standing bursts</h2>
+<p>Five seated frames produced no detection at all, almost all in the farthest burst (172414). In one-detection frames the missing dummy was the right-side silver one 25 times vs 8 for the left — partly the photo composition (the silver dummy sat against background clutter), possibly also its low contrast against grey furniture. A couple of thin false boxes hugged the frame edge; a 3% border margin filter removes them.</p>
+<p>The standing bursts (173126/173204) read almost entirely as Robot. This is not a model defect: standing placements are illegal under the rulebook, so the training pose space excludes them on purpose, and these photos exist only as appearance references. For the future 4-dummy symmetric arrangement, the plan is a layer above the detector: combine the known H-R-H-R symmetry with per-box confidence — and per §04, give Human calls the benefit of the doubt.</p>
+
+<h2><span class="num">06</span>What we do about it</h2>
+<ol class="rec">
+  <li><strong>Inference settings:</strong> confidence threshold 0.25 (not 0.5 — halving the threshold nearly doubled recall with no visible false-positive cost), plus <code>agnostic_nms=True</code> or an equivalent cross-class IoU dedupe in post-processing, plus a 3% frame-edge filter.</li>
+  <li><strong>Decision policy:</strong> latch the left/right verdict only at close range (box ≥ ~25% of image height) and only after a majority vote over several frames. Never trust a single far-range frame — frame-to-frame flicker in this handheld set was ~94%.</li>
+  <li><strong>Root fix (training side):</strong> the far-range Human→Robot flip won't improve with more epochs — training already auto-stopped on a plateau at mAP50 0.987. It needs a garment mesh on the synthetic Human dummy and more small-scale figures in the render mix. Scheduled for dataset v2.</li>
+</ol>
+
+<footer>
+  Model: YOLO11n <code>v25f2/weights/best.pt</code>, trained on synthetic Blender renders only (zero real photos in training). Eval: 127 real venue photos, 97 scored after exclusions. Analysis scripts: <code>analyze_real.py</code> + L/R scoring, repo <code>IDC2026_TeamBlue</code>.
+</footer>
+</main>
+</body>
+
+</html>
