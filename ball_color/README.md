@@ -7,6 +7,7 @@
 
 | 파일 | 역할 | 토픽 |
 |---|---|---|
+| `field_spec.py` | 필드 상수 단일 소스 (출처·TODO-FIELD 태그, 카메라 기하 파생 함수) | — |
 | `classify.py` | 공 색 분류 코어 + 디바운서 | — |
 | `config.json` | ROI·임계값·카메라 설정 전부 | — |
 | `ball_color_node.py` | Camera 3 → 공 색 (Pi/테스트 겸용) | `/ball_color`, `/ball_color/state` |

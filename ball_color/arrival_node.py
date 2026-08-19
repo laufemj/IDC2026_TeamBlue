@@ -21,7 +21,10 @@ from rclpy.node import Node
 from rclpy.qos import DurabilityPolicy, QoSProfile
 from std_msgs.msg import Bool, Int8
 
-BBOX_H_NEAR = 0.28          # bbox height fraction of image = "close enough"
+# "close enough" bbox height.  Kept above field_spec.DET_LATCH_MIN_H (0.25),
+# the range below which the real-photo study showed the detector's
+# human/robot call is not yet 100% reliable (docs/lr_field_report.html).
+BBOX_H_NEAR = 0.28          # bbox height fraction of image
 LANES_GONE_WITH_BOX = 8     # frames of lanes==0 needed when (a) is also true
 LANES_GONE_ALONE = 30       # frames of lanes==0 needed on its own
 

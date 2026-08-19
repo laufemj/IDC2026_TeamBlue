@@ -20,12 +20,18 @@ Everything is a ratio of image width, so it works at any preview resolution.
 
 import numpy as np
 
-# lane geometry as fractions of image width, assuming the approach band
-# (0.2-1.0 m ahead).  At 66 deg HFOV and ~0.3 m lane spacing, the pair spans
-# roughly 0.35-0.75 of the width mid-approach.  Tunable at calibration.
+import field_spec as F
+
 LANE_W_MIN = 0.015          # min dark-run width, fraction of image width
 LANE_W_MAX = 0.16           # max (a lane very close is wide)
-PAIR_SPACING = 0.42         # expected centre-to-centre, fraction of width
+# Expected lane centre-to-centre distance as a fraction of image width, AT
+# THE ROWS WHERE CLUSTERING HAPPENS (bottom quarter of the 0.45 band, i.e.
+# image rows 0.89-1.0, ground 0.29-0.35 m ahead).  Derived from the field
+# geometry instead of the old eyeballed 0.42 -- which was the mid-band value
+# and made the single-lane fallback offset ~35% short.  Depends on
+# field_spec CAM_HEIGHT / CAM_TILT_DEG (both TODO-FIELD): one frame of the
+# real mount looking at the real lanes verifies it.
+PAIR_SPACING = F.lane_pair_image_fraction(0.945)   # ~0.57 at current spec
 DARK_RATIO = 0.55           # run is "dark" if below this x band brightness
 
 
