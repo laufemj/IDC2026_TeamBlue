@@ -109,7 +109,7 @@ nav/launch_all.sh <n_balls> <red|blue> <HR|RH-fallback>
 | 4 | Nav layer (drive / mission / goal-sides / servos) | **done**, logic-tested; hardware untested |
 | 5 | Field spec + L/R field report docs | **done** |
 | 6 | ONNX fallback export | **done** (note: PyTorch was *faster* on x86 — benchmark on the Pi before choosing) |
-| 7 | IMX500 on-sensor conversion (INT8 quantization + packaging) | **in progress** — toolchain needs Python ≤3.12 (`~/.venvs/imx`); first quantization pass ran, run died mid-way, retrying |
+| 7 | IMX500 on-sensor conversion (INT8 quantization + packaging) | **done** — `models/dummy_yolo11n_v25f2_imx_model/` fits on-chip (90%), 80% L/R usable on real photos |
 | 8 | IMX500 detector ROS node publishing `/dummy_detections` | todo (interface contract in `nav/README.md` §5) |
 | 9 | Robot assembly, wiring, camera mount (15° down) | hardware side, off-repo |
 

@@ -1,0 +1,341 @@
+
+
+########## message (17280 chars, ts=2026-08-17T03:30:07.361Z):
+@"/home/mj/.claude/uploads/83b5fd0b-5a8d-5a40-9e8b-949ccbc284fa/0edda32f-Contest_Rules_final2026.pdf" make a cad model for the autonomous robot. the  basic idea is given in design idea.png . there should be an arm extending system with two extending arm, both extending with a single servo. ive also attached a sample stl file for the extension system. 
+
+as for the raspberry pi, into which two cameras are attached, the ribbons are only 20 cm long so the effective length i get to use is even lesser. i need one camera to face the ball right before the servo moving in the xz directin. the other camera to face the front of the bot. 
+
+the autonomous robot.stl is the extension system
+
+
+below was an initial design setup, if there is anything mentioned about an asymetric funnel dont bother, we will make a simple funnel as in the drawing. also, check the rule book to understand how much initial dimensions must be to follow the rules. 
+
+
+ask any additional info necessary\
+
+
+Mechanical design brief · rev A
+
+Ball-Sorter CAD Brief
+
+project	units	date	source of truth
+
+Robocon ball-sorter bot 	mm · deg · g 	2026-08-17 	config.py §1–§7 in the robot repo
+
+
+
+Every value in this brief carries one of three tags. contract values are baked into the running software — the CAD must match them, or the config key listed next to them must be updated and the calibration tools re-run. Neither side is sacred; they just have to agree. proposed values are free choices with a suggested starting point. open values are inputs nobody has pinned yet — §11 lists them; pin them before modelling, because most of the ball path derives from them.
+
+§1THE MACHINE IN ONE PARAGRAPH
+
+
+
+A two-wheel differential-drive robot that navigates a painted grid by camera. It starts in a coloured box, drives to a collection row, extends a pair of arms backwards for humans to dump balls into, reverses to a firing row while holding the balls, then dispenses them one at a time — a second camera reads each ball's colour and a flap steers it out the front toward the matching goal post. Front = the direction camera 1 faces = the direction balls exit. Back = arms = ball input. The chassis never turns between collecting and firing; the geometry of the machine is what makes that work, so the front/back roles above are load-bearing, not convention.
+
+§2DATUM & AXES
+
+
+
+Model everything from one datum: the point on the floor midway between the two wheel contact patches. The robot spins in place about this point, and all software geometry (camera height, pitch, distances to lines) chains back to it.
+
+
+
+    +X forward (camera-1 boresight, ball exit)
+
+    +Y left, +Z up, floor is Z = 0
+
+
+
+Put a physical, visible datum on the chassis: a scribed line or hole pattern over the axle midpoint. Post-build calibration means measuring lens height and pitch with a ruler — give the ruler something to measure from.
+
+§3THE CONTRACT — CAD VALUES THE CODE ALREADY ASSUMES
+
+
+
+If the model changes any row, change the config key and re-run tools/check_geometry.py + tools/calib_drive.py.
+
+value	current	config key	breaks if wrong
+
+Wheel diameter	65 mm 	WHEEL_DIAMETER_M 	encoder odometry (when enabled)
+
+Wheel track (contact-patch centres)	180 mm 	WHEEL_TRACK_M 	encoder turn measurement
+
+Camera-1 lens height	300 mm 	CAM1_HEIGHT_M 	every distance-to-line the robot computes
+
+Camera-1 pitch (down from horizontal)	20° 	CAM1_PITCH_DEG 	same — the two together set the ground map
+
+Camera-1 mounted upright, not mirrored	— 	CAM1_HFLIP / VFLIP 	left/right decisions invert silently
+
+Servo-1 positions (arms + gate)	10 / 90 / 140 / 170° 	SERVO1_*_DEG 	linkage geometry must hit these, or retune them
+
+Servo-2 flap throw	35 / 90 / 145° 	SERVO2_*_DEG 	ball aim at the goals
+
+Ball clears the flap within	0.8 s 	BALL_TRAVEL_TIME_S 	channel slope must guarantee this
+
+Hopper / queue capacity	≥ 12 balls 	SORT_MAX_BALLS 	sorting stops early if the queue overflows the geometry
+
+The lens sits ahead of the axle datum. Keep that X-offset small (≤ 200 mm) and record it — the software measures distances from the camera, but the robot stops with its wheels. A forgotten offset becomes a constant position error at every line.
+
+§4OVERALL LAYOUT & ENVELOPE
+
+FIG 1 · side view, +X to the right. Shaded wedge = camera-1 ground view; it starts ≈335 mm ahead of the lens (42° below horizontal at the frame bottom).
+
+FIG 2 · top view. Exit divergence ±17° puts a ball on a goal post 600 mm off-centre from 1.93 m out (firing row 3).
+
+envelope	value	tag	why
+
+Chassis footprint	≈ 320 × 240 mm 	proposed 	spins with a ≈400 mm diagonal — comfortable in 1200 mm lanes
+
+Overall height	≈ 340 mm 	proposed 	lens at 300 + housing; nothing above the lens is needed
+
+Max size / weight	? 	open 	competition rulebook limit — check before fixing the envelope
+
+§5DRIVE BASE
+
+
+
+    Two driven wheels, Ø65, track 180 contract — rubber tyres; the code soft-starts over 0.15 s specifically to avoid wheel slip, and all navigation assumes the wheels don't skid.
+
+    Third contact: ball caster or PTFE skid, at the BACK proposed — the arms take the load of humans dumping balls, so the rear needs support. Do not use a swivel castor: its offset wheel kicks the tail sideways on every direction change, which reads as a heading error the vision then has to fix.
+
+    Axle near mid-length, CG low and slightly rear — the robot brakes hard by shorting the motor windings (that is what keeps its dead reckoning honest). Brake-dive with a tall front mast is real: keep battery (the heaviest item) on the floor plate near the axle.
+
+    Motors open — target ≈160 rpm at the wheel (gives the ~0.55 m/s the config assumes at full duty). Hard limit: stall current ≤ 3 A per motor — that is the driver's continuous rating. A 25GA/37GA gearmotor fits; verify stall on the datasheet, not the nominal current.
+
+    Encoder provision — mounts and cable route for shaft encoders even if not fitted now; the software already supports them (ENCODERS_ENABLED).
+
+
+
+§6BALL PATH — BACK TO FRONT
+
+
+
+One continuous gravity path: arms → hopper/queue → gate → colour window → flap → exit ramp. Everything scales off ball diameter, which is still open — model the whole channel parametrically on it.
+
+6.1 · Intake arms (servo 1, rear)
+
+
+
+Two arms that fold along the chassis for travel and extend to both sides as a funnel/basket at collection. Humans dump balls in; the arms guide them into the hopper. The same servo also operates the dispense gate:
+
+angle	state	meaning
+
+10°	STOW	arms folded, travel position
+
+90°	ARMS	extended both sides, collecting
+
+170°	VERTICAL	gate CLOSED, queue held, ready to sort
+
+140°	DISPENSE	gate open 0.30 s — exactly one ball leaves
+
+This is the hardest mechanism in the robot. One servo shaft covers two jobs across its 10–170° range. Two workable interpretations — pick one in CAD, don't leave it implicit: (a) a lost-motion linkage: 10→90° deploys the arms while the gate stays shut, 140→170° works the gate while the arms stay put, with dead travel between; or (b) a tipping scoop that is both — horizontal to collect, rotated up to feed/hold, cracked open to meter. If neither can be made clean, split into two servos — the electronics have spare pins, but that is a config + code change, so decide it now, not at assembly.
+
+6.2 · Hopper & queue
+
+
+
+    Capacity ≥ 12 balls contract; feeds a single-file queue — width = ball Ø + 4–6 mm so balls cannot pass or jam side-by-side, walls at least one ball-radius tall.
+
+    Slope ≥ 8–10° everywhere; no flat spots, no converging corners two balls can arch across (the classic silo jam).
+
+    The robot reverses ~1 m with a full queue — the hold must be positive (gate), not friction.
+
+
+
+6.3 · Metering gate
+
+
+
+The 170→140→170 cycle must release exactly one ball, every time, for any queue length. A single flap plus 0.3 s of timing is ball-size and slope-sensitive; a two-finger escapement (front finger releases ball n while a rear finger holds ball n+1) does it geometrically. Fits naturally into the 30° swing.
+
+6.4 · Colour window (camera 2)
+
+
+
+    After the gate, each ball passes/rests in view of camera 2. The vision expects the ball in the bottom-centre of the frame (ROI x 0.30–0.70, y 0.55–1.00 of a 640×480 image) — aim the camera so the ball's rest/pass point lands there.
+
+    Standoff 80–150 mm proposed; check the module's minimum focus distance at final standoff.
+
+    Enclose it: opaque shroud + small diffused white LED. Colour classification is HSV-based; ambient light changes are the failure mode (a green colour cast from room lighting has already bitten this robot once). A closed, self-lit chamber makes calibration permanent.
+
+    Matte, neutral interior — not white (blows highlights), not coloured (casts). Mid-grey.
+
+
+
+6.5 · Flap & exit (servo 2, front)
+
+angle	state	meaning
+
+35°	LEFT	ball exits toward left goal
+
+90°	CENTER	neutral / unknown ball
+
+145°	RIGHT	ball exits toward right goal
+
+
+
+    Ball must fully clear the flap within 0.8 s of the gate opening contract — slope the exit accordingly.
+
+    Aim: goal posts sit ±600 mm off-centre, fired from ≈1.93 m → exit channels diverge ≈±17° from straight ahead. Make the flap stops adjustable (slotted), then freeze the servo angles in config to match reality.
+
+    Exit lip at floor level, smooth transition — a dropped, bouncing ball does not roll straight for two metres. This roll is the least controllable part of the whole mission; treat exit smoothness as a first-class spec, not a detail.
+
+
+
+§7VISION MOUNTS
+
+7.1 · Camera 1 — the field camera (front mast)
+
+
+
+    Lens centre at Z = 300, pitch 20° down contract, boresight parallel to +X within ~1°, roll level within ~1° (line-angle detection reads roll as robot yaw).
+
+    Keep-out wedge (FIG 1): from the lens, everything below a line 42° under horizontal, across ±35° horizontally, must be empty — no bumper, no arms in any position, no wiring. The floor becomes visible ≈335 mm ahead of the lens; anything of the robot in that wedge blinds the navigation.
+
+    Pitch-adjustable, then lockable: slotted arc + engraved degree marks. Calibration is "measure height and pitch with a ruler and type them into config" — design for that measurement.
+
+    Stiffness over everything. The software waits 0.35 s after each move for the image to stop shaking; a whippy mast eats that budget. Triangulate the mast (gusset or A-frame), don't cantilever a single pole.
+
+
+
+7.2 · Camera 2 — the chute camera
+
+
+
+    Inside the §6.4 shroud. Board camera, 25 × 24 mm, 4 × M2 holes — light and unfussy.
+
+    Orientation free (flips are config), but mount it square to the channel so the ROI stays rectangular.
+
+
+
+§8ELECTRONICS BAY & POWER
+
+item	size / mounting	placement notes
+
+Raspberry Pi 5 	85 × 56, 4 × M2.5 on 58 × 49 	+ active cooler height ≈ 30 mm total. SD slot, USB-C power and HDMI must stay reachable assembled.
+
+Motor driver (MDD3A) 	take from datasheet drawing 	screw terminals AND the two onboard test buttons reachable — they are the first debugging tool for every motor fault.
+
+Cameras ×2 (CSI) 	25 × 24, M2 	Pi 5 uses 22-pin 0.5 mm mini-FFC. Pick standard lengths (200/300/500 mm), route with ≥ 10 mm bend radius, no bends at the connector, clip every 80–100 mm. Ribbons are the robot's most fragile parts.
+
+Battery 	open — 2S/3S Li-ion suggested 	7.4–11.1 V suits driver (4–16 V) and gearmotors. Strap-in bay on the floor plate at the axle; removable without tools for charging.
+
+5 V regulator for the Pi 	open 	Pi 5 wants 5 V / 5 A. Never share the motor rail unregulated — brownouts present as vision faults, not motor faults.
+
+Pull-down resistor board 	4 × 10 kΩ to GND 	planned addition on the driver inputs — leave a small perfboard footprint next to the driver.
+
+Master switch 	inline, battery → driver 	reachable in < 1 s with the robot moving away from you.
+
+
+
+    One ground bus. Pi, driver, servo supply, regulator — star ground on one bus bar. Half the failures this robot has already had looked like software and were wiring.
+
+    Servo power separate from Pi 5 V; provision for a PCA9685 board on I²C-1 (config supports it) if software PWM jitters under load.
+
+    Label every signal wire at both ends (M1A, M1B, M2A, M2B, GND). This exact robot has already lost an afternoon to one unlabelled jumper on a wrong header pin.
+
+
+
+§9THE FIELD IT LIVES ON
+
+feature	value	consequence for CAD
+
+Painted line width	30 mm 	ground clearance is uncritical; tape thickness ≈ 0
+
+Lane spacing (longitudinal)	1200 mm 	envelope + extended arms must work inside a lane
+
+Row spacing (transverse)	900 mm 	—
+
+Field length	4500 mm 	—
+
+Goal post spacing	1200 mm (±600 off-centre) 	sets the ±17° exit divergence (§6.5)
+
+Firing distance	≈1930 mm (row 3) 	the roll the exit ramp must survive
+
+Start box	size open 	whole footprint must fit inside it
+
+Field numbers are the config's current values and are themselves unverified against the real arena — they are listed so the CAD and the config disagree with reality together, and get fixed in one measuring session.
+
+§10DETAILS YOU'LL MISS
+
+
+
+The explicitly-requested list. Every one of these is invisible in a pretty render and painful at the bench:
+
+
+
+    The camera keep-out wedge. The single most common self-inflicted vision failure: a bumper, wire, or the arms' stowed position poking into the bottom of frame. Model the wedge as a solid in the assembly and run interference checks against every arm position.
+
+    A bench cradle. A stand that lifts both wheels off the table. Motor tests, calibration and demos all happen with the robot running; without a cradle it runs off the desk. Two blocks in the CAD, ten minutes of printing, endless value.
+
+    Jam access. A finger-sized opening or hinged lid over every section of the ball channel. Balls jam; the fix must not be "unscrew eight fasteners".
+
+    Ball drain. A way to empty the hopper by hand at the end of a run without inverting the robot.
+
+    Ribbon service loops. CSI ribbons need slack at both ends and must not cross a hinge or the mast's adjustment arc. A ribbon that tugs when you adjust camera pitch will fail at the connector in week two.
+
+    Measurability. Scribed datum over the axle midpoint, degree marks on the camera pivot, a flat reference face parallel to the floor. Calibration is done with a ruler — design the ruler's landing spots.
+
+    Wire strain relief at the servos. Servo 1 moves through 160°; its own lead is the moving part everyone forgets. Anchor the lead to the arm structure, not across the joint.
+
+    Test-button and terminal access on the motor driver with the robot fully assembled — first line of defence for every drive fault.
+
+    SD card and USB-C access assembled. Re-flashing or powering the Pi must not require disassembly.
+
+    CG under load asymmetry. Empty robot, full hopper (12 balls), arms extended with someone pressing down on them: three load cases, and the caster + wheelbase must be stable in all three.
+
+    Brake-dive. Hard active braking + tall mast + front-heavy = nose-dip that shakes the camera exactly when the software wants a stable frame. If the mast wobbles at each stop, move mass rearward or soften MOTOR_BRAKE_ON_STOP.
+
+    Fastener reachability. Every screw needs a straight tool path in the assembled state. Check with the driver bit modelled, not hoped.
+
+    The exit lip. The last 10 mm of the robot decides whether a ball rolls true for 2 m or bounces. Radius it, polish it, make it replaceable.
+
+    A carrying handle. This robot gets picked up fifty times a day, usually by the mast if you don't give people a better option.
+
+    Status visibility. Sightline to the Pi's LED (or mount a small external LED) — "is it even booted" should not require a monitor.
+
+    Spare mounting real estate. A grid of unused holes near the electronics bay. The PCA9685, the pull-down board, and whatever week 3 invents will need somewhere to live.
+
+
+
+§11OPEN INPUTS — PIN THESE BEFORE MODELLING
+
+#	input	drives
+
+1	Ball diameter (and mass, surface) 	the entire channel: widths, gate, escapement, shroud, exit
+
+2	Rulebook limits: max size, weight, start-box size 	envelope, §4
+
+3	Motor model (gear ratio, stall current ≤ 3 A) 	motor mounts, wheel choice, battery voltage
+
+4	Battery chemistry & size 	bay dimensions, CG, regulator choice
+
+5	Servo models (SG90 vs MG996R class) 	all four mount pockets, horn geometry, arm torque
+
+6	Servo-1 mechanism choice (§6.1: linkage vs scoop vs two servos) 	the whole rear assembly; software changes if two servos
+
+7	Real field measurements 	§9 table + config §1 together
+
+§12HAND-OFF — CLOSING THE LOOP AFTER THE BUILD
+
+
+
+The CAD is done when the physical robot and config.py agree. In order:
+
+
+
+    Measure lens height & pitch → CAM1_HEIGHT_M, CAM1_PITCH_DEG → run tools/check_geometry.py
+
+    Confirm wheel Ø and track as-built → WHEEL_DIAMETER_M, WHEEL_TRACK_M
+
+    Find true servo angles for the four servo-1 states and three flap states → SERVO1_*, SERVO2_* (via tools/test_hardware.py, key o prints them ready to paste)
+
+    Drive calibration → tools/calib_drive.py; camera focal check → tools/calib_goal_ratio.py; colour calibration inside the finished shroud → tools/calib_hsv.py
+
+
+
+references
+
+
+
+Driver ratings & dimension drawing: Cytron MDD3A product page · MDD3A datasheet (PDF, dimension figure). All software values: config.py in the robot repository.

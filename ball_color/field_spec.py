@@ -68,9 +68,16 @@ MATCH_DURATION_S = 180
 # Tie-break chain: cyber points, then whichever autonomous robot ends nearer
 # the centre of its own Start A -- finishing near Start A has value.
 
+# --- robot as-built (recovered Pi config + CAD session, see
+# docs/pi_session_recovery.md) ------------------------------------------ [TEAM]
+WHEEL_DIAMETER = 0.173     # kit wheel, measured (Pi config said 0.065 -- wrong)
+WHEEL_TRACK = 0.242        # as-built contact-patch centres, m
+FULL_DUTY_SPEED = 0.55     # m/s at duty 1.0, Pi config assumption; recalibrate
+
 # --- camera (IMX500, front) -------------------------------------------- [TEAM]
-CAM_HEIGHT = 0.25          # lens above local floor, m; TODO-FIELD (mount)
-CAM_TILT_DEG = 15.0        # downward tilt, chosen design value
+CAM_HEIGHT = 0.30          # lens above local floor; Pi config CAM1_HEIGHT_M,
+                           # matches the CAD mast (z=300).  TODO-FIELD verify
+CAM_TILT_DEG = 20.0        # Pi config CAM1_PITCH_DEG, matches CAD mount
 CAM_VFOV_DEG = 52.3        # 4:3 capture
 CAM_HFOV_DEG = 2 * math.degrees(math.atan(
     math.tan(math.radians(CAM_VFOV_DEG / 2)) * 4 / 3))   # ~66.3 deg

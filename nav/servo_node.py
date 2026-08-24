@@ -9,9 +9,16 @@ Topics:
                                   one open-close cycle per message
     /servo/arms  std_msgs/Bool    true = extend collecting arms (s1)
 
-All pins and angles are parameters with PLACEHOLDER defaults -- set them
-from the real wiring/linkage.  MG996R on gpiozero defaults (1-2 ms pulse);
-widen min/max_pulse_width here if the real horn travel comes up short.
+Angle defaults are the RECOVERED Pi-session contract values
+(docs/pi_session_recovery.md), expressed on gpiozero's -90..+90 scale
+(Pi config used 0..180: value_here = pi_value - 90):
+  servo-1 (arms+gate, one shaft, lost-motion): STOW 10, ARMS 90,
+  DISPENSE 140, VERTICAL/closed 170  ->  -80 / 0 / +50 / +80
+  servo-2 (flap): LEFT 35 / CENTER 90 / RIGHT 145  ->  -55 / 0 / +55
+Verify on the real linkage (the Pi's test_hardware tool that bench-tuned
+them is lost).  PIN numbers are still PLACEHOLDERS -- set from real wiring.
+MG996R on gpiozero defaults (1-2 ms pulse); widen min/max_pulse_width if
+the real horn travel comes up short.
 
 Note for Pi 5: gpiozero's software PWM jitters; if the flap chatters, move
 these three to the kit's PWM board (ADA-815) and keep this node's topic
@@ -24,7 +31,8 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Bool, Empty, String
 
-FEED_CYCLE_S = 0.35     # gate open time for one ball (Ø60 mm)
+FEED_CYCLE_S = 0.30     # gate open time for one ball (recovered Pi contract:
+                        # DISPENSE held 0.30 s releases exactly one ball)
 
 
 class ServoNode(Node):
@@ -32,9 +40,9 @@ class ServoNode(Node):
         super().__init__("servos")
         for name, default in (
                 ("flap_pin", 12), ("feed_pin", 13), ("arms_pin", 19),
-                ("flap_left_deg", -40.0), ("flap_right_deg", 40.0),
-                ("feed_closed_deg", 0.0), ("feed_open_deg", 55.0),
-                ("arms_in_deg", 0.0), ("arms_out_deg", 80.0)):
+                ("flap_left_deg", -55.0), ("flap_right_deg", 55.0),
+                ("feed_closed_deg", 80.0), ("feed_open_deg", 50.0),
+                ("arms_in_deg", -80.0), ("arms_out_deg", 0.0)):
             self.declare_parameter(name, default)
         p = lambda k: self.get_parameter(k).value
 
