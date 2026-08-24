@@ -111,7 +111,7 @@ nav/launch_all.sh <n_balls> <red|blue> <HR|RH-fallback>
 | 6 | ONNX fallback export | **done** (note: PyTorch was *faster* on x86 — benchmark on the Pi before choosing) |
 | 7 | IMX500 on-sensor conversion (INT8 quantization + packaging) | **done** — `models/dummy_yolo11n_v25f2_imx_model/` fits on-chip (90%), 80% L/R usable on real photos |
 | 8 | IMX500 detector ROS node publishing `/dummy_detections` | todo (interface contract in `nav/README.md` §5) |
-| 9 | Robot assembly, wiring, camera mount (15° down) | hardware side, off-repo |
+| 9 | Robot assembly, wiring, camera mount (20° down, lens z=300 mm) | hardware side, off-repo |
 
 ## 7. At-the-venue checklist (in order)
 
@@ -133,8 +133,13 @@ nav/launch_all.sh <n_balls> <red|blue> <HR|RH-fallback>
 
 ## 8. Known gaps / risks
 
-- **IMX500 conversion unfinished** (item 7). Fallback: run the `.pt` on the
-  Pi CPU (~ok for 640 px if throttled) or `.onnx` — benchmark both on-Pi.
+- **The competition Pi is lost** and with it the GPIO pin numbers and
+  bench-tuned values of the original robot repo. What was recoverable is in
+  `docs/pi_session_recovery.md` (servo angles, camera mount, wheel specs —
+  already applied); motor/servo **pin params are still placeholders**.
+- INT8 (IMX500) trades a little accuracy vs FP32 (80% vs 85% L/R usable on
+  the real photos). If on-sensor FPS is not needed, `.pt` on the Pi CPU is
+  the accuracy-max fallback — benchmark `.pt` vs `.onnx` on-Pi.
 - Far-range human→robot flips are inherent to the current synthetic human
   (no garment mesh). Mitigated by the close-range latch; real fix is a v2
   clothed mesh + far-scale augmentation if retraining ever happens.
