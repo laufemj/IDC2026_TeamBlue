@@ -24,20 +24,35 @@ CAD Brief** into the CAD session on 2026-08-17. Verbatim copy:
 | Camera-2 ROI | x 0.30–0.70, y 0.55–1.00 @640×480 | matches `ball_color/config.json` philosophy; verify at build |
 | driver | MDD3A, sign-magnitude, labels M1A/M1B/M2A/M2B, onboard test buttons | pin NUMBERS not in the brief — still lost |
 
+## SECOND RECOVERY WAVE (2026-08-25): the Pi session's Artifacts
+
+The Pi session published Artifacts to the account — readable even with the
+machine gone. Recovered and transcribed into this repo:
+
+| artifact | date | recovered to |
+|---|---|---|
+| FIELD_DAY.md (field-day playbook) | 08-19 | `docs/pi_field_day_playbook.md` |
+| IDC2026 Sorter Backlog (post-field-day full state) | 08-21 | `docs/pi_sorter_backlog.md` |
+| Line Detection Probe | 08-20 | key values below |
+| Ball-Sorter CAD Brief | 08-17 | already had via paste |
+| Ball Photo Triage / Debug Frame Gallery / Ball Divider Frames | 08-19/20 | image evidence, not transcribed |
+
+**Recovered after all — the GPIO pins:** MDD3A signal = physical pins
+**32 (M1A), 11 (M1B), 33 (M2A), 16 (M2B), 6 (GND)** = BCM **12, 17, 13, 23**.
+Applied as `nav/drive_node.py` defaults (left/right channel assignment and
+polarity still need a teleop check).
+
+**Line Detection Probe findings (real field):** the black tape is GLOSSY —
+a darkness mask of V≤70 missed it; the Pi raised LINE_MAX_VALUE 70→200 and
+LINE_MAX_SAT 90→140. Effective camera pitch measured 16.4° (vs 20° design).
+Lane-pair pixel spacing cap 450 px at their band 0.96–1.43 m.
+
 ## Still lost (never left the Pi)
 
-- `config.py` itself — including **GPIO pin numbers** for MDD3A and servos.
-  `nav/drive_node.py` / `servo_node.py` pin params remain placeholders.
-- `tools/test_hardware.py`, `calib_drive.py`, `check_geometry.py`,
-  `calib_goal_ratio.py`, `calib_hsv.py` implementations. Their *roles* are
-  reconstructed in this repo (capture_reference.py, field_spec derivations,
-  nav calibration checklist); the code is rewritten, not recovered.
-- Any bench-measured values from the motor test the Pi session ran
-  ("the test earlier for the motors had worked").
-- The only other possible copy is the Remote Control transcript viewable
-  from the account at claude.ai (session titled "the test earlier for the
-  motors…"). If it opens, pin numbers may be quoted there — paste them into
-  this file and update the two nodes.
+- The code itself (`~/idc/robocon_bot`: main.py state machine, tools/*.py,
+  sim). Roles and every tuned value are now documented in the two recovered
+  docs; the implementation would have to be rewritten.
+- The 45 real-run debug-frame folders and logs referenced by the backlog.
 
 ## Important context on the brief
 

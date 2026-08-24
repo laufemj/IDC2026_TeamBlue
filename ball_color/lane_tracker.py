@@ -32,6 +32,12 @@ LANE_W_MAX = 0.16           # max (a lane very close is wide)
 # field_spec CAM_HEIGHT / CAM_TILT_DEG (both TODO-FIELD): one frame of the
 # real mount looking at the real lanes verifies it.
 PAIR_SPACING = F.lane_pair_image_fraction(0.945)   # ~0.57 at current spec
+# Real-field caveat (recovered Pi field logs, docs/pi_sorter_backlog.md):
+# the venue tape is GLOSSY -- an absolute darkness mask of V<=70 missed it
+# entirely and the Pi stack had to allow V up to 200.  This tracker uses a
+# RELATIVE threshold (fraction of the band's bright quantile), which should
+# ride through gloss better, but verify on real frames and raise DARK_RATIO
+# toward 0.75 if specular tape drops out of the mask.
 DARK_RATIO = 0.55           # run is "dark" if below this x band brightness
 
 

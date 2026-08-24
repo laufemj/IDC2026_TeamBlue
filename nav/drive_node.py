@@ -43,8 +43,12 @@ def mix(v, w, trim=TRIM):
 class DriveNode(Node):
     def __init__(self):
         super().__init__("drive")
-        self.declare_parameter("left_pins", [17, 18])    # PLACEHOLDER (M1A,M1B)
-        self.declare_parameter("right_pins", [22, 23])   # PLACEHOLDER (M2A,M2B)
+        # RECOVERED wiring (docs/pi_session_recovery.md): MDD3A signals on
+        # physical pins 32/11 (M1A/M1B) and 33/16 (M2A/M2B) = BCM 12/17 and
+        # 13/23.  Which channel is LEFT and each polarity: verify by teleop,
+        # then swap the pin lists / pin order here if needed.
+        self.declare_parameter("left_pins", [12, 17])    # M1 (BCM)
+        self.declare_parameter("right_pins", [13, 23])   # M2 (BCM)
         self.declare_parameter("trim", TRIM)
         lp = self.get_parameter("left_pins").value
         rp = self.get_parameter("right_pins").value
