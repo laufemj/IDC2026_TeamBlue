@@ -25,3 +25,4 @@ cad/**/__pycache__/
 
 # deployed model weights are versioned (exception to *.pt above)
 !models/*.pt
+!models/**/packerOut.zip
