@@ -2,7 +2,12 @@
 
 ## dummy_yolo11n_v25f2.pt
 
-더미(human/robot) 검출기 최종본. 현재까지 가장 검증된 가중치.
+더미(human/robot) 검출기의 보존된 최종 가중치.
+
+[프로젝트 소개](../README.md) · [추론 예제](../docs/getting-started.md)
+
+아래 7.7k는 `dataset_v25`의 학습 split입니다. 팀 보고서의 약 18,000장은
+프로젝트 전체 합성 이미지 생성 규모로, 동일한 집계가 아닙니다.
 
 - 아키텍처: YOLO11n, imgsz 640, 클래스 0=human, 1=robot
 - 학습: 100% 합성(Blender 렌더, dataset_v25 7.7k train), 실사진 0장
@@ -18,15 +23,16 @@
   from ultralytics import YOLO
   YOLO("models/dummy_yolo11n_v25f2.pt").predict(img, imgsz=640,
       conf=0.25, agnostic_nms=True)
-- IMX500 온센서 배포는 별도 export 필요 (진행 예정)
+- IMX500 INT8 변환 산출물은 아래 디렉터리에 보존되어 있습니다.
+  실제 경기 당일 추론이 온센서였는지는 확인되지 않았으며, 보고서는 Pi CPU 실행을 추정합니다.
 
 ## dummy_yolo11n_v25f2.onnx (폴백)
 
 IMX500 변환 실패 시 Pi CPU에서 돌릴 폴백 (opset 13, simplify, 640).
 "ONNX = 항상 빠름"이 아님에 주의: 개발 데스크톱(x86) 실측은
 PyTorch 14.7 ms vs ONNX 39.2 ms/frame으로 PyTorch가 우세했다.
-Pi 5(ARM)에서는 별도 벤치마크 후 빠른 쪽을 쓸 것. 1차 계획은 어디까지나
-IMX500 온센서 실행(Pi CPU 점유 ~0)이다.
+Pi 5(ARM)에서는 별도 벤치마크 후 선택해야 합니다. IMX500 온센서 실행은
+원래 배포 계획이었으며, 실제 경기 사용 경로와 구분합니다.
 
 ## dummy_yolo11n_v25f2_imx_model/ (IMX500 온센서 배포용)
 

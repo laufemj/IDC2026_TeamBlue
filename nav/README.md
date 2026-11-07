@@ -3,6 +3,9 @@
 `ball_color/`(인식 층)가 만든 토픽을 소비해 실제로 경기를 뛰는 층.
 설계 원칙은 인식 층과 동일: **순수 로직 모듈(테스트 가능) + 얇은 ROS 래퍼.**
 
+> 현재 체크아웃은 원본 대회용 Pi 코드의 백업이 아닌 복구·재구성 자료입니다.
+> [실행 안내](../docs/getting-started.md)와 [복구 기록](../docs/pi_session_recovery.md)을 함께 확인하세요.
+
 ## 파일
 
 | 파일 | 역할 | 토픽 |
@@ -45,8 +48,9 @@ python3 nav/test_logic.py     # 25 checks, 의존성 없음
 
 ## 실기 전 캘리브레이션 (전부 파라미터/상수로 노출됨)
 
-1. **핀 배치**: `drive_node` left/right_pins, `servo_node` *_pin — 현재
-   PLACEHOLDER. 배선 확정 후 설정.
+1. **핀 배치**: 모터 기본값은 복구된 BCM 12/17, 13/23입니다. 좌우 채널과
+   극성은 실물에서 확인해야 합니다. 서보 핀은 여전히 PLACEHOLDER이며
+   기본값 12/13이 모터 핀과 겹칩니다. 실제 배선에 맞는 독립 핀으로 수정 후 실행하세요.
 2. **듀티 스케일**: `steering.py` V_CRUISE/V_MIN, `drive_node` TRIM —
    직진 주행으로 캘리브레이션 (경사 5° 내리막 주의: 낮게 시작).
 3. **서보 각도**: `servo_node` flap/feed/arms 각도 — 링키지 확정 후.
