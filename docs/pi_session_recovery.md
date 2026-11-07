@@ -1,7 +1,11 @@
-# Lost Pi session — what was recovered, what is gone
+# Pi-session recovery — what was recovered, what is gone
+
+> Historical recovery record. The competition Pi was returned to the organizers,
+> leaving the original code unavailable. Later recovery waves below supersede
+> some initial "lost" or "placeholder" entries; they do not restore the deployed code.
 
 The competition Raspberry Pi (which ran its own Claude session and held "the
-robot repository": `config.py` + `tools/`) is permanently lost. This note
+robot repository": `config.py` + `tools/`) is no longer available to the team. This note
 records everything salvageable, found on 2026-08-24 by searching this
 machine's transcripts: the user had pasted the Pi session's full **Ball-Sorter
 CAD Brief** into the CAD session on 2026-08-17. Verbatim copy:
