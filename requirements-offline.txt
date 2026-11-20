@@ -1,0 +1,4 @@
+# Only the offline ball-colour sample demonstration.
+# ROS 2, Pi camera/GPIO, detector training and CAD use separate environments.
+numpy
+Pillow

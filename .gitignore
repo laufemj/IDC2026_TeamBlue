@@ -26,3 +26,6 @@ cad/**/__pycache__/
 # deployed model weights are versioned (exception to *.pt above)
 !models/*.pt
 !models/**/packerOut.zip
+
+# Curated supplied fabrication mesh (source artifact, not a generated cache)
+!hardware/fabrication/stl/Autonomous Robot.stl

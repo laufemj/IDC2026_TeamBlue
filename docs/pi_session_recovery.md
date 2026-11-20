@@ -1,5 +1,11 @@
 # Lost Pi session — what was recovered, what is gone
 
+> Archive clarification (2026-11-20): the supplied team report states that the
+> competition Pi was returned to the organizers. “Lost” below refers to access
+> to its deployed source/configuration. This historical recovery log retains
+> earlier assumptions and later recovery waves; read the complete note and the
+> [current provenance summary](evidence.md) before treating a value as final.
+
 The competition Raspberry Pi (which ran its own Claude session and held "the
 robot repository": `config.py` + `tools/`) is permanently lost. This note
 records everything salvageable, found on 2026-08-24 by searching this
