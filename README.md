@@ -1,149 +1,151 @@
-# IDC2026 Team Blue — Autonomous Robot
+# IDC2026 Team Blue
 
-Robocon International Design Contest 2026 (*AI to Science*), Institute of
-Science Tokyo. This repo holds everything for our **autonomous robot**: the
-vision stack, the navigation/mission stack, the synthetic-data pipeline that
-trained the dummy detector, and the project documentation.
+### A two-robot system for *AI to Science*
 
-> New teammate? Read this page, then `docs/field_spec.md` (what the field
-> actually is), then the README inside whichever directory you're touching.
+**Design Prize · IDC ROBOCON 2026 · Institute of Science Tokyo, Japan · 10–22 August 2026**
 
----
+[한국어](README.ko.md) · [Project report](docs/project_report.md) · [Evidence and provenance](docs/evidence.md) · [Hardware archive](hardware/README.md)
 
-## 1. The game, in one paragraph
+![Team Blue presenting its robots at IDC ROBOCON 2026](docs/images/team-presentation.jpg)
 
-3-minute match on a shared 5°-sloped table. Our autonomous robot starts at
-**Start A** (top of the slope) preloaded with orange + silver balls, drives
-down between the two black tape lanes to its team's two tunnel **goals**, and
-sorts balls with a servo flap: **orange → the goal with the HUMAN figure,
-silver → the goal with the ROBOT figure** (1 pt each; a goal holding only
-correct-colour balls **doubles**). The two figures are near-identical wooden
-mannequins — grey-clothed (human) vs silver-painted (robot) — and **which
-figure sits on which goal is randomized every match**, so telling them apart
-on camera is the core perception problem. Robots must never touch figures.
-Full extraction with provenance tags: **`docs/field_spec.md`**.
+Five members from Korea, India, China, Japan and Thailand built two cooperating
+robots: a teleoperated machine for bulk ball collection, and an autonomous
+machine for vision-guided navigation and colour sorting. The design used the
+field's slope to move balls between them under gravity.
 
-## 2. System architecture
+This repository preserves perception and control software, the synthetic-data
+pipeline, detector weights, selected fabrication files and the team's project
+record. **The competition Pi was returned to the organizers; this is an archive
+and partial reconstruction, with known deployment gaps.**
 
-```
-                     Raspberry Pi 5 (ROS 2)
-   ┌─────────────────────────────────────────────────────────┐
-   │  PERCEPTION (ball_color/)        NAVIGATION (nav/)      │
-   │                                                         │
-IMX500 ─ dummy detection (on-sensor) ─► /dummy_detections    │
-   │  │                                  └► goal_sides_node ─► /goal_sides
-   │  └─ preview ─► lane_node ─► /line_offset ──► mission_node
-   │                └► /lanes_visible ─► arrival_node ─► /arrived
-   │     team_side (start tape) ─► /team_side ──────┤        │
-Cam Mod 3 ─ ball_color_node (chute) ─► /ball_color ─┤        │
-   │                                                ▼        │
-   │                       mission_node ─► /cmd_vel ─► drive_node ─► MDD3A
-   │                                    └► /servo/* ─► servo_node ─► s1 s2 s3
-   └─────────────────────────────────────────────────────────┘
-```
+## Results
 
-Design rule used everywhere: **pure-logic module (testable, no ROS/hardware)
-+ thin ROS wrapper node**. All field-dependent numbers live in ONE file,
-`ball_color/field_spec.py`, provenance-tagged, with `TODO-FIELD` marking the
-few numbers still awaiting a tape measure.
-
-## 3. Repository map
-
-| Path | What it is | Docs |
+| Area | Outcome | Evidence scope |
 |---|---|---|
-| `ball_color/` | Perception: ball colour (chute cam), dual-lane centreline, team-side tape, arrival fusion, **`field_spec.py`** | `ball_color/README.md` |
-| `nav/` | Action: PD steering, match state machine, L/R goal verdict, motor/servo drivers, launcher | `nav/README.md` |
-| `models/` | Trained dummy-detector weights (`.pt` + `.onnx`) with full metadata | `models/README.md` |
-| `dummy_model/` | Synthetic-data pipeline: mannequin URDF generator, MuJoCo pose settling, photo-calibrated Blender scene, dataset renderer, training/eval scripts | file docstrings |
-| `docs/` | `field_spec.md` (field truth), `lr_field_report.html` (detector eval on real photos — open in a browser) | — |
-| `cad/` | build123d generators for the robot CAD (STEP/GLB regenerate from source) | — |
-| `Contest_Rules_final2026.pdf` | Official rulebook Ver 1.01 — the only normative source | — |
+| Design recognition | **Design Prize**, awarded to Blue Team | [Original certificate](docs/evidence/design-prize-certificate.pdf); no judging reasons or ranking stated |
+| Cyber world game | **2/2 balls goaled** | Team-reported result |
+| Physical tournament | **0 points in 2 preliminary matches** | Team-reported; no advancement |
+| Bulk capture | All **55 balls** captured repeatedly in testing; approximately half and all in the two matches | Team-reported observation; extraction and delivery remained unreliable |
+| Autonomous operation | Navigation, figure identification and goal alignment reported successful in both matches | No successful integrated scoring run; sorting demonstrated in testing |
+| Figure detector | Synthetic-only training; close-range classification reported **100%** on the evaluated subset | [Real-photo study](docs/lr_field_report.html); close-range sample count not given; far-range errors remained |
 
-## 4. Key results so far
+Collector jams and uncontrolled ramp delivery prevented balls from reaching the
+autonomous robot reliably. Its floorless containment also could not retain the
+earned preload. The [report](docs/project_report.md) records the successful
+subsystems and these limitations together.
 
-**Dummy detector** (`models/dummy_yolo11n_v25f2.pt`, YOLO11n): trained on
-**synthetic Blender renders only** (photo-calibrated materials/lighting,
-MuJoCo-settled seated poses, occlusion-checked labels; zero real photos).
-On the 127 real venue photos:
+## How the system works
 
-- close range (box ≥ ~24 % of frame height): human/robot **100 % correct**
-- silver-robot calls correct at **every** range (34/34); the only failure
-  mode is far-range human→robot flips
-- operating point (already in `field_spec.py`): conf 0.25,
-  **agnostic NMS**, 3 % edge filter, L/R latch only at close range
+Orange balls belong in the **human figure's goal**, silver balls in the **robot
+figure's goal**. The figures exchange left/right positions between matches, so
+the robot must identify them before routing balls. A goal with multiple balls
+all of the correct colour receives a doubling bonus. Matches last three minutes.
+See the [official rulebook](Contest_Rules_final2026.pdf) and
+[field specification](docs/field_spec.md).
 
-Full analysis with failure causes: `docs/lr_field_report.html`.
+```mermaid
+flowchart LR
+    A[Teleoperated robot<br/>Bulk capture on Zone W] --> B[Collector and ramp<br/>Delivery to upper Zone S]
+    B --> C[Gravity<br/>Balls roll down the slope]
+    C --> D[Autonomous robot<br/>Extending funnel and metering]
+    D --> E[Figure identity + ball colour]
+    E --> F[Two chutes<br/>Human / robot goals]
+```
 
-**Nav layer**: complete state machine with timeout fallbacks at every wait,
-jam watchdog, 0.5 s motor deadman, and mis-sort protection (unclassifiable
-balls go to the side that protects the score double). `python3
-nav/test_logic.py` — 25 checks, no dependencies.
+**Teleoperated robot.** An electromagnet releases a bottomless box over the ball
+stack. Differential drive moves the captured group; geared collector motors
+feed a ramp rising approximately 40 cm. This replaces the supplied Go2 platform
+with a purpose-built machine, at the cost of a second complete build.
 
-## 5. Quick start
+**Autonomous robot.** One servo deploys both capture arms from a 50 cm starting
+envelope. An asymmetric wedge forms a queue, an anti-congestion flap breaks up
+jams, and a sorting flap routes balls to two chutes. A Raspberry Pi 5 uses two
+cameras for goal-figure recognition, lane following and ball-colour sensing.
+Motion combines vision and timing; no wheel encoders were used.
+
+## Synthetic data, real-field perception
+
+The team report describes approximately **18,000 synthetic renders** generated
+during the contest window. About **500 venue photographs** informed Blender
+materials and lighting, rather than detector training. The pipeline combines
+mannequin URDF generation, MuJoCo pose settling, Blender rendering and
+occlusion-checked labels to train YOLO11n.
+
+The [retained evaluation](docs/lr_field_report.html) covers 127 real venue
+photos, with 97 scored after exclusions and 81 legal seated-pose frames:
+
+- FP32 produced a usable, ground-truth-consistent reading in **69/81** seated
+  frames (85%); the study's definition includes partial consistent readings.
+- **34/34 silver-robot detections** were classified correctly. This is a
+  detection count, not a claim of perfect recall.
+- Close-range class accuracy was reported as **100%** at roughly 24–25% frame
+  height. The subset size is not recorded; this is not overall accuracy on 127
+  photos. The control logic uses a 25% close-range gate before latching sides.
+
+An INT8 package for IMX500 was also built: **65/81** seated frames usable (80%).
+The exact contest-day inference backend was not retained; the team report
+suggests Pi CPU inference. [Model details and limitations](models/README.md).
+
+## Repository guide
+
+| Path | Contents |
+|---|---|
+| [ball_color/](ball_color/README.md) | Ball-colour classification, lane tracking, team-side and arrival sensing; shared field constants |
+| [nav/](nav/README.md) | Testable steering, goal-side voting and mission logic, ROS 2 wrappers and motor/servo drivers |
+| [dummy_model/](dummy_model/) | Synthetic-data generation, scene calibration, training and evaluation scripts |
+| [models/](models/README.md) | YOLO11n PyTorch, ONNX and IMX500 conversion artifacts |
+| [hardware/](hardware/README.md) | Supplied Fusion assemblies, selected STEP parts and DXF cutting files, with a source manifest |
+| [cad/](cad/README.md) | Parametric CAD representation; dependencies and differences from the physical build |
+| [docs/project_report.md](docs/project_report.md) | Strategy, mechanisms, match outcomes and engineering lessons |
+| [docs/evidence.md](docs/evidence.md) | Source inventory, metric definitions, photos and reconstruction limits |
+| [docs/field_spec.md](docs/field_spec.md) | Rulebook extraction and field geometry with provenance tags |
+| [docs/pi_session_recovery.md](docs/pi_session_recovery.md) | Historical Pi-session recovery record and recovered notes |
+
+## Try the preserved software
+
+From the repository root, with Python 3:
 
 ```bash
-# ball-colour classifier on the bundled venue crops (needs numpy+pillow only)
-python3 ball_color/ball_color_node.py --images 'ball_color/samples/*.png'
+# Steering, goal-side voting and mission checks: no third-party dependencies
+python nav/test_logic.py
 
-# nav logic tests (no dependencies at all)
-python3 nav/test_logic.py
-
-# dummy detector on an image (needs ultralytics)
-python3 - <<'EOF'
-from ultralytics import YOLO
-r = YOLO("models/dummy_yolo11n_v25f2.pt").predict(
-    "your.jpg", imgsz=640, conf=0.25, agnostic_nms=True)
-EOF
-
-# full stack on the Pi (after calibration, below)
-nav/launch_all.sh <n_balls> <red|blue> <HR|RH-fallback>
+# Offline ball-colour demonstration: NumPy and Pillow
+python -m pip install -r requirements-offline.txt
+python ball_color/ball_color_node.py --images 'ball_color/samples/*.png'
 ```
 
-## 6. Status board
+The existing logic suite contains **25 checks**. The image demonstration labels
+the two orange samples `orange`, the silver sample `silver`, and lime `none`.
+White also reads `silver` without an empty-pocket reference: a known limitation
+of colour-only classification. See the [calibration procedure](ball_color/README.md).
 
-| # | Work item | State |
-|---|---|---|
-| 1 | Synthetic data pipeline (URDF → poses → calibrated renders → labels) | **done** |
-| 2 | Dummy detector training + real-photo validation | **done** (v25f2) |
-| 3 | Perception nodes (ball colour / lanes / team side / arrival) | **done**, venue calibration pending |
-| 4 | Nav layer (drive / mission / goal-sides / servos) | **done**, logic-tested; hardware untested |
-| 5 | Field spec + L/R field report docs | **done** |
-| 6 | ONNX fallback export | **done** (note: PyTorch was *faster* on x86 — benchmark on the Pi before choosing) |
-| 7 | IMX500 on-sensor conversion (INT8 quantization + packaging) | **done** — `models/dummy_yolo11n_v25f2_imx_model/` fits on-chip (90%), 80% L/R usable on real photos |
-| 8 | IMX500 detector ROS node publishing `/dummy_detections` | todo (interface contract in `nav/README.md` §5) |
-| 9 | Robot assembly, wiring, camera mount (20° down, lens z=300 mm) | hardware side, off-repo |
+To inspect detector predictions, install Ultralytics separately and use:
 
-## 7. At-the-venue checklist (in order)
+```python
+from ultralytics import YOLO
 
-1. Tape-measure the `TODO-FIELD` numbers → edit `ball_color/field_spec.py`
-   (field width 2.39 vs 2.70 first; then goal x-positions, Start A, camera
-   height). Every consumer updates automatically.
-2. Pins/angles: `nav/drive_node.py` motor pins, `nav/servo_node.py` pins +
-   angles (placeholders!), duty scale + `trim` by driving a straight line —
-   start slow, the slope helps you downhill.
-3. Ball colour: `ball_color/capture_reference.py` 5-minute procedure with
-   the real balls in the real pocket. If silver reads "none" → pocket too
-   dark → revisit the LED question.
-4. Lane geometry: one preview frame of real lanes through the real mount
-   confirms `PAIR_SPACING` (derived from camera height/tilt).
-5. Dummy detector sanity: run the model on a handful of on-robot frames of
-   the placed figures (`models/README.md` snippet).
-6. Match config per round: `n_balls`, `cfg_side` (announced ≥5 min ahead),
-   `cfg_goal_sides` fallback — parameters of `nav/launch_all.sh`.
+model = YOLO("models/dummy_yolo11n_v25f2.pt")
+model.predict("your-photo.jpg", imgsz=640, conf=0.25, agnostic_nms=True)
+```
 
-## 8. Known gaps / risks
+The [navigation guide](nav/README.md) documents the archived Pi launcher and
+topic contracts. The launcher requires ROS 2, camera/GPIO dependencies, an
+external detector publisher and a verified hardware configuration. It does not
+reproduce the full reported competition mission: the receiving-position
+sequence and revised anti-jam mechanism are not implemented in this snapshot.
 
-- **The competition Pi is lost** and with it the GPIO pin numbers and
-  bench-tuned values of the original robot repo. What was recoverable is in
-  `docs/pi_session_recovery.md` (servo angles, camera mount, wheel specs —
-  already applied); motor/servo **pin params are still placeholders**.
-- INT8 (IMX500) trades a little accuracy vs FP32 (80% vs 85% L/R usable on
-  the real photos). If on-sensor FPS is not needed, `.pt` on the Pi CPU is
-  the accuracy-max fallback — benchmark `.pt` vs `.onnx` on-Pi.
-- Far-range human→robot flips are inherent to the current synthetic human
-  (no garment mesh). Mitigated by the close-range latch; real fix is a v2
-  clothed mesh + far-scale augmentation if retraining ever happens.
-- No encoders: all forward motion is vision + timing. The tie-break
-  (end nearest own Start A) is deliberately not attempted.
-- `nav/servo_node.py` uses software PWM; if the flap jitters on the Pi 5,
-  move servos to the kit's ADA-815 PWM board (topic interface unchanged).
+## Team and credits
+
+The award certificate names **Takato Inoue, Yuyang Gao, Koshy Prasanth,
+Minjoon Jang and Soravit Satechaichan**. Concept development was collaborative;
+electrical assembly and wiring were shared across both machines. The supplied
+portfolio attributes autonomous robot implementation and team-wide technical
+direction to Minjoon Jang. Other individual roles are not assigned here because
+the supplied record does not establish them.
+
+The team report credits an AI coding agent used from the command line for
+software implementation, with design strategy, calibration and operating-point
+decisions made by the team. Photos, sketches and fabrication files come from
+the supplied project folder; filenames and checksums are recorded in the
+[evidence notes](docs/evidence.md). No new reuse license is assigned to code,
+media, organizer documents or third-party models.

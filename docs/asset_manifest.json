@@ -1,0 +1,229 @@
+{
+  "schema_version": 1,
+  "imported_on": "2026-11-20",
+  "source_root_label": "Supplied IDC2026 folder",
+  "copy_policy": "Byte-identical copies; destination names may differ.",
+  "consulted_sources_not_copied": [
+    {
+      "source_relative": "Documentary Evidence/IDC2026_TeamBlue_Project_Report_TeamVersion(1).md",
+      "sha256": "cbeb538aa2c434a08b4580741317883af131edf10ebecfd7f36b5ace2ff27b07",
+      "bytes": 44719
+    },
+    {
+      "source_relative": "Minjoon_Jang_IDC2026_One_Page.pdf",
+      "sha256": "68c9e1553bf03d2b410ea4e423f4c27e4a82d970460cffa921bf1cb1c979ff0c",
+      "bytes": 1904887
+    },
+    {
+      "source_relative": "Minjoon_Jang_IDC2026_Portfolio.pdf",
+      "sha256": "376d53f79fe4592cec4db41252e5fcd26395d28658b1db9cc03794a605189284",
+      "bytes": 3116274
+    }
+  ],
+  "files": [
+    {
+      "path": "docs/evidence/design-prize-certificate.pdf",
+      "source_relative": "Documentary Evidence/IDC2026_Certificate of design prize.pdf",
+      "bytes": 86431,
+      "sha256": "a9f9ad32d1a49128435f0b5dfaeda4244c58b254f836433a4c6d289692e8c182"
+    },
+    {
+      "path": "docs/images/pipeline-sketch.jpg",
+      "source_relative": "Documentary Evidence/Picture_1.jpg",
+      "bytes": 278786,
+      "sha256": "ebd08801dd9840aaf9737a67ac125899c3f1c27e19d938457363f71ca99bd67e"
+    },
+    {
+      "path": "docs/images/sorter-sketch.png",
+      "source_relative": "Documentary Evidence/IdeaPresentation.png",
+      "bytes": 347813,
+      "sha256": "a6473b27f12a6e75a8d65d8198ca9f21df7fe6efb600a0a909873b889f1b0cd8"
+    },
+    {
+      "path": "docs/images/team-blue.jpg",
+      "source_relative": "Documentary Evidence/Picture_4.jpg",
+      "bytes": 2334285,
+      "sha256": "e41d52e675ef142faa7ba1fb55d2aadea2daafbf8c10a868d475bd082fccb286"
+    },
+    {
+      "path": "docs/images/team-presentation.jpg",
+      "source_relative": "Documentary Evidence/Picture_6.jpg",
+      "bytes": 2058494,
+      "sha256": "c8d2561a2a100d2a7ba80ad355bc19dda9c5d7cba958d0d12eb50cb0b9735738"
+    },
+    {
+      "path": "docs/images/workshop-assembly.png",
+      "source_relative": "Documentary Evidence/Picture_11.png",
+      "bytes": 2463649,
+      "sha256": "3ed988cf3fa63396e8209a97aa96321824949e723133b898e946bb8e9aa55177"
+    },
+    {
+      "path": "hardware/fabrication/dxf/Arm_Base.dxf",
+      "source_relative": "Things To Print/Arm_Base.dxf",
+      "bytes": 5061,
+      "sha256": "10c0692fb8362d6d9773595c5f1cb70b7f08106dfbbabc4bdd6ff514684d70e9"
+    },
+    {
+      "path": "hardware/fabrication/dxf/Arm_Base_Connector.dxf",
+      "source_relative": "Things To Print/Arm_Base_Connector.dxf",
+      "bytes": 5815,
+      "sha256": "ae93533bd12bb66da9a0a5101e461a48dfea8680fbeffd631c839e3a92390e8c"
+    },
+    {
+      "path": "hardware/fabrication/dxf/Connector_Board.dxf",
+      "source_relative": "Things To Print/Connector_Board.dxf",
+      "bytes": 10397,
+      "sha256": "d9115b0e5a6ab5fa5eb5b88614be78545de936871bf68326d37a8bc46b08a9b7"
+    },
+    {
+      "path": "hardware/fabrication/dxf/Connector_V3.dxf",
+      "source_relative": "Things To Print/Connector_V3.dxf",
+      "bytes": 6941,
+      "sha256": "ad24872ecb1b6981537f13bdc937208f10b180ce629bf1dbd70c608bf22f2527"
+    },
+    {
+      "path": "hardware/fabrication/dxf/Connector_V3_Hole.dxf",
+      "source_relative": "Things To Print/Connector_V3_Hole.dxf",
+      "bytes": 7387,
+      "sha256": "1dcd2b5caf22c81beffa0e743fe3edf44c884ea88cde88982c4c35c0820450a9"
+    },
+    {
+      "path": "hardware/fabrication/dxf/Dividing_Wall.dxf",
+      "source_relative": "Things To Print/Dividing_Wall.dxf",
+      "bytes": 4593,
+      "sha256": "0ce38e778d985fac12adb0efe613226fbfd350eabc6fb8b24a99ab5974fed254"
+    },
+    {
+      "path": "hardware/fabrication/dxf/Flap_1.dxf",
+      "source_relative": "Things To Print/Flap_1.dxf",
+      "bytes": 2919,
+      "sha256": "2b37d2cae0064891012be8e775473e13f5bba01ab5c20098f2a52399bd7d32b5"
+    },
+    {
+      "path": "hardware/fabrication/dxf/Gear_Wall_MDF.dxf",
+      "source_relative": "Things To Print/Gear_Wall_MDF.dxf",
+      "bytes": 4073,
+      "sha256": "c9e807b5e5101dc17846e69f1e1e70603e7a9b66eb07a3d46dd095341b039283"
+    },
+    {
+      "path": "hardware/fabrication/dxf/New_Arm_Board_MDF.dxf",
+      "source_relative": "Things To Print/New_Arm_Board_MDF.dxf",
+      "bytes": 4112,
+      "sha256": "dd2bfa4338b8886078aa867ad1a6c1c8de2b890aef36b01f70b097ae0f8425cc"
+    },
+    {
+      "path": "hardware/fabrication/dxf/main_board_high_v3.dxf",
+      "source_relative": "Things To Print/main_board_high_v3.dxf",
+      "bytes": 9651,
+      "sha256": "f15d9d5a393cd6f1b2d28e93cdbfee7a4590a6c4124f82eaf5b2eabc633687de"
+    },
+    {
+      "path": "hardware/fabrication/dxf/main_board_low_v3.dxf",
+      "source_relative": "Things To Print/main_board_low_v3.dxf",
+      "bytes": 14268,
+      "sha256": "f6d51a2d79d437ee11fe924de0facd88bb66207b4356d41cab6cc9b159c983b8"
+    },
+    {
+      "path": "hardware/fabrication/dxf/main_board_v2.dxf",
+      "source_relative": "Things To Print/main_board_v2.dxf",
+      "bytes": 13571,
+      "sha256": "d769206a26323b0245220b7d3fbebdccc956bc3a6295fca2e49282e8e62a4ef8"
+    },
+    {
+      "path": "hardware/fabrication/step/Dividing_Wall.step",
+      "source_relative": "Things To Print/Dividing_Wall.step",
+      "bytes": 3989,
+      "sha256": "278861b34d01eaf350851dfdb1e9c3aa11c35d38d3bcc79fe6fde847d4d4579b"
+    },
+    {
+      "path": "hardware/fabrication/step/Gear Rack_Right.step",
+      "source_relative": "Things To Print/Gear Rack_Right.step",
+      "bytes": 446852,
+      "sha256": "2c7ef715ef01f2b2ff3490d485852103da955d36eca6b593c617230c416b9ac4"
+    },
+    {
+      "path": "hardware/fabrication/step/Gear_Left.step",
+      "source_relative": "Things To Print/Gear_Left.step",
+      "bytes": 3494932,
+      "sha256": "a6fa531be05b5bbd57a896b900305dd345d43c43d8d4317a542dfec3e427f2aa"
+    },
+    {
+      "path": "hardware/fabrication/step/Gear_Middle.step",
+      "source_relative": "Things To Print/Gear_Middle.step",
+      "bytes": 2054158,
+      "sha256": "8827ea3738db91807a4521ced684dc797821de91508b38ca1a70298970d22346"
+    },
+    {
+      "path": "hardware/fabrication/step/Gear_Mount_Left.step",
+      "source_relative": "Things To Print/Gear_Mount_Left.step",
+      "bytes": 19953,
+      "sha256": "5c8ecdf8d89127986e40a859ed23bc8be0792231860a41bcbf065a030c54134e"
+    },
+    {
+      "path": "hardware/fabrication/step/Gear_Mount_Right.step",
+      "source_relative": "Things To Print/Gear_Mount_Right.step",
+      "bytes": 22215,
+      "sha256": "59916e8b288340f79083bcd4a6e6e69d188ea4a9c0e11ec6197ac056df73ce7e"
+    },
+    {
+      "path": "hardware/fabrication/step/Gear_Right_Final.step",
+      "source_relative": "Things To Print/Gear_Right_Final.step",
+      "bytes": 3535037,
+      "sha256": "72e5007a726710c15082e14b7b8eb7b9884b43dc8dc5ea939f38f80ce53c8669"
+    },
+    {
+      "path": "hardware/fabrication/step/Pinion_Gear_Rack_Modified.step",
+      "source_relative": "Things To Print/Pinion_Gear_Rack_Modified.step",
+      "bytes": 21835,
+      "sha256": "d2f5c62cc25e29d524724036885b96cfe5a0dc08b8522a8a2215a8c5103813e1"
+    },
+    {
+      "path": "hardware/fabrication/step/Pinion_right.step",
+      "source_relative": "Things To Print/Pinion_right.step",
+      "bytes": 24170,
+      "sha256": "7b0b26930cca6b788c63f1da8e23a733495c69cc4a42c630228b599f6ec70e4e"
+    },
+    {
+      "path": "hardware/fabrication/step/Servo_Tray_2.step",
+      "source_relative": "Things To Print/Servo_Tray_2.step",
+      "bytes": 27158,
+      "sha256": "47c5db039857f12bda136b83565e554d8747318536b2ea09df9a379e7ad13204"
+    },
+    {
+      "path": "hardware/fabrication/step/Wall.step",
+      "source_relative": "Things To Print/Wall.step",
+      "bytes": 26787,
+      "sha256": "498add6d07a46333cbc4225db5ebe7ceefc636e62dbafb4af89edab266d31e61"
+    },
+    {
+      "path": "hardware/fabrication/stl/Autonomous Robot.stl",
+      "source_relative": "Things To Print/Autonomous Robot.stl",
+      "bytes": 1753484,
+      "sha256": "f6e3640371ad5e3e8643914c8312f041990f6e7e5248751e04f797069e618662"
+    },
+    {
+      "path": "hardware/fusion/Autonomous Robot.f3d",
+      "source_relative": "Autonomous Robot.f3d",
+      "bytes": 6867942,
+      "sha256": "f31c962c00835484b11cb0f7a44ceae930d28f78b35345029ca80154c73fabff"
+    },
+    {
+      "path": "hardware/fusion/BaseWall_Left.f3d",
+      "source_relative": "Things To Print/BaseWall_Left.f3d",
+      "bytes": 132869,
+      "sha256": "3103a420ffcabdd7a9106f1d240495ccc7545f51fe116e749b07d701123eb766"
+    },
+    {
+      "path": "hardware/fusion/BaseWall_Right.f3d",
+      "source_relative": "Things To Print/BaseWall_Right.f3d",
+      "bytes": 63126,
+      "sha256": "2d6fff150f9e23076ff837e7cbce26e80606bd0236f9c3ffe82fac39c582f315"
+    },
+    {
+      "path": "hardware/fusion/Gear_Right_Final.f3d",
+      "source_relative": "Things To Print/Gear_Right_Final.f3d",
+      "bytes": 726823,
+      "sha256": "b1163c55105ad46b7eddf5bb272a4d79b57f4bd4481bdae789e9341245a33f1b"
+    }
+  ]
+}

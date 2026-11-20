@@ -1,5 +1,8 @@
 # ball_color — 경량 CV 서브시스템 모음 (모델 불필요)
 
+> 보존된 코드의 사용 안내입니다. 경기 당시 실행본 전체가 아니며, 복원 범위는
+> [근거 자료](../docs/evidence.md#what-this-repository-can-reproduce)를 참고하세요.
+
 공 색 판정 + 레인 중앙 주행 + 진영 판정 + 도착 판정.
 전부 순수 numpy, 프레임당 ~1ms대, Pi 5 CPU 오차 범위 수준.
 
@@ -17,11 +20,15 @@
 | `team_side.py` | 시작 시 빨강/파랑 진영 1회 판정 (latched) | `/team_side` |
 | `arrival_node.py` | 골 사이 도착 판정: (a) bbox 크기 + (b) 레인 소실 | `/arrived` |
 
-## 카메라 기하 (확정)
+## 카메라 기하 (현재 코드의 기준값)
 
-IMX500: **아래로 15° 틸트**, 4:3 모드(VFOV 52.3°), 높이 25cm 기준
-- 지평선: 화면 상단에서 21% 지점 → 상단은 원거리 골/더미
-- 하단 밴드 45% (`lane_node.BAND_FRAC`): 전방 **0.29–0.79m** 지면 = 레인 제어 윈도우
+`field_spec.py`는 IMX500의 **아래로 20° 틸트**, 높이 **30 cm**,
+4:3 모드(VFOV 52.3°)를 사용합니다. 이전 문서의 15°/25 cm와 그로부터 계산한
+거리 범위는 현재 상수와 맞지 않습니다. 거리와 레인 간격은 해당 파일의
+`ground_distance()`와 `lane_pair_image_fraction()`로 계산합니다.
+
+이는 설계·복원 기준값입니다. 역사적 현장 기록에는 유효 틸트 약 16.4°도 남아 있어,
+실제 마운트에 맞춰 재측정해야 합니다. [복원 기록](../docs/pi_session_recovery.md).
 
 ## 토픽
 
@@ -48,6 +55,11 @@ python3 capture_reference.py silver
 python3 ball_color_node.py --images 'shots/*.jpg'   # 전 샷 판정 확인
 python3 ball_color_node.py             # 운용
 ```
+
+위 명령은 `ball_color/` 폴더 안에서 실행합니다. 저장소 최상위에서 하드웨어 없이
+예제를 실행하려면 [루트 README](../README.md#try-the-preserved-software)를 참고하세요.
+기준 영상 없이 흰색 예제를 넣으면 `silver`로 분류됩니다. 색 분류만으로는
+흰색과 은색을 구분할 수 없으므로 예제 실행을 완전한 검증으로 해석하지 않습니다.
 
 ## 하드웨어 권장 (신뢰도 최대 레버)
 

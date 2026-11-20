@@ -1,0 +1,11 @@
+# Keep imported project artifacts byte-identical to their supplied originals.
+/hardware/fusion/** -text -diff
+/hardware/fabrication/** -text -diff
+/hardware/fusion/** linguist-generated=true
+/hardware/fabrication/** linguist-generated=true
+/docs/images/** -text -diff
+/docs/evidence/*.pdf -text -diff
+
+# Documentation has consistent line endings across platforms.
+*.md text eol=lf
+requirements-offline.txt text eol=lf

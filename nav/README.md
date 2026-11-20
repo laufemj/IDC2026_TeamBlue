@@ -1,5 +1,14 @@
 # nav — 자율 로봇 주행·미션 층
 
+> 이 폴더는 보존·복원된 제어 코드입니다. 경기 당시 전체 실행본이 아닙니다.
+> 실제 경기 결과는 [프로젝트 보고서](../docs/project_report.md), 코드와 실물의
+> 차이는 [복원 범위](../docs/evidence.md#what-this-repository-can-reproduce)를 참고하세요.
+
+현재 `mission_logic.py`에는 보고서의 수신 위치 이동·고정 대기 과정 전체가 없고,
+`servo_node.py`는 최종 실물의 막힘 해소 타격판 대신 피더 게이트를 제어합니다.
+`launch_all.sh`에는 `/dummy_detections` 발행 노드가 포함되지 않습니다. 따라서
+전체 경기 동작을 그대로 재현하는 실행 명령으로 제시하지 않습니다.
+
 `ball_color/`(인식 층)가 만든 토픽을 소비해 실제로 경기를 뛰는 층.
 설계 원칙은 인식 층과 동일: **순수 로직 모듈(테스트 가능) + 얇은 ROS 래퍼.**
 
@@ -45,8 +54,10 @@ python3 nav/test_logic.py     # 25 checks, 의존성 없음
 
 ## 실기 전 캘리브레이션 (전부 파라미터/상수로 노출됨)
 
-1. **핀 배치**: `drive_node` left/right_pins, `servo_node` *_pin — 현재
-   PLACEHOLDER. 배선 확정 후 설정.
+1. **핀 배치**: 모터 신호 BCM 12/17/13/23은 [복원 기록](../docs/pi_session_recovery.md)에서
+   찾아 `drive_node` 기본값에 반영되었습니다. 좌우 채널·극성·트림은 실물 확인이
+   필요합니다. `servo_node`의 핀은 여전히 PLACEHOLDER입니다. 예시 서보 핀 12/13은
+   모터 기본값과 겹치므로, 배선을 확인해 핀을 재지정한 뒤 실행해야 합니다.
 2. **듀티 스케일**: `steering.py` V_CRUISE/V_MIN, `drive_node` TRIM —
    직진 주행으로 캘리브레이션 (경사 5° 내리막 주의: 낮게 시작).
 3. **서보 각도**: `servo_node` flap/feed/arms 각도 — 링키지 확정 후.
