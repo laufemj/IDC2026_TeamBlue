@@ -239,7 +239,6 @@ competition build or its electrical configuration.
 |---|---|
 | Cyber world game | Both balls goaled; full marks |
 | Preload entitlement | Four balls (two orange, two silver), instead of the baseline two |
-| Physical preliminary matches | Two played, zero won, zero points |
 | Advancement | Did not reach the final four |
 | Design recognition | Design Prize, confirmed by the original certificate |
 

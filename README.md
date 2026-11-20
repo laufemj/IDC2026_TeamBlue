@@ -24,7 +24,6 @@ and partial reconstruction, with known deployment gaps.**
 |---|---|---|
 | Design recognition | **Design Prize**, awarded to Blue Team | [Original certificate](docs/evidence/design-prize-certificate.pdf); no judging reasons or ranking stated |
 | Cyber world game | **2/2 balls goaled** | Team-reported result |
-| Physical tournament | **0 points in 2 preliminary matches** | Team-reported; no advancement |
 | Bulk capture | All **55 balls** captured repeatedly in testing; approximately half and all in the two matches | Team-reported observation; extraction and delivery remained unreliable |
 | Autonomous operation | Navigation, figure identification and goal alignment reported successful in both matches | No successful integrated scoring run; sorting demonstrated in testing |
 | Figure detector | Synthetic-only training; close-range classification reported **100%** on the evaluated subset | [Real-photo study](docs/lr_field_report.html); close-range sample count not given; far-range errors remained |
